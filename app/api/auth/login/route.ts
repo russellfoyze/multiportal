@@ -6,12 +6,22 @@ import {
   createSessionCookie,
   DEFAULT_USER,
 } from "@/lib/auth";
+import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Resolve client IP for rate limiting
+    const forwarded = request.headers.get("x-forwarded-for");
+    const ip = forwarded
+      ? forwarded.split(",")[0].trim()
+      : request.headers.get("x-real-ip") || "127.0.0.1";
+
+    const rateLimitKey = `login_${ip}`;
+
     const body = await request.json();
     const { email, password, totpCode } = body;
 
+    // 2. Validate required inputs
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
@@ -19,31 +29,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Check rate limit BEFORE validating credentials
+    const rateCheck = checkRateLimit(rateLimitKey, {
+      limit: 5,
+      windowMs: 15 * 60 * 1000, // 15-minute lockout window
+    });
+
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        {
+          error: `Too many failed authentication attempts. Access locked for security. Try again in ${rateCheck.retryAfterSeconds} seconds.`,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": rateCheck.retryAfterSeconds.toString(),
+          },
+        }
+      );
+    }
+
+    // 4. Timing-safe verification of email & password
     if (!checkEmail(email) || !checkPassword(password)) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        {
+          error: "Invalid credentials. Access attempt logged.",
+          remainingAttempts: rateCheck.remaining,
+        },
         { status: 401 }
       );
     }
 
-    // Check 2FA if enabled
+    // 5. Check 2FA if enabled
     if (DEFAULT_USER.twoFactorEnabled) {
       if (!totpCode) {
-        // First step passed, require TOTP code
+        // Primary authentication succeeded; advance to step 2 (TOTP verification)
         return NextResponse.json({
           requires2FA: true,
-          message: "Please provide the 6-digit 2FA code from your authenticator app",
+          message: "Please provide the 6-digit verification code from your authenticator app",
         });
       }
 
       const isValidTOTP = verifyTOTP(totpCode);
       if (!isValidTOTP) {
         return NextResponse.json(
-          { error: "Invalid 2FA authentication code. Please try again or use 123456 for demo." },
+          {
+            error: "Invalid 2FA authentication code. Please check your authenticator app and try again.",
+            remainingAttempts: rateCheck.remaining,
+          },
           { status: 401 }
         );
       }
     }
+
+    // 6. Reset rate limit counter upon successful full authentication
+    resetRateLimit(rateLimitKey);
 
     const token = await createSessionCookie(DEFAULT_USER);
 

@@ -15,7 +15,11 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("akter@mahossain.com");
+  const isDemoMode =
+    process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === "true" ||
+    process.env.NODE_ENV !== "production";
+
+  const [email, setEmail] = useState(isDemoMode ? "akter@mahossain.com" : "");
   const [password, setPassword] = useState("");
   const [totpCode, setTotpCode] = useState("");
   const [requires2FA, setRequires2FA] = useState(false);
@@ -138,8 +142,10 @@ export default function LoginPage() {
                 <div className="p-3 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-xs text-indigo-300">
                   <p className="font-semibold text-white">Two-Factor Authentication</p>
                   <p className="mt-0.5 text-slate-300 text-[11px]">
-                    Enter the 6-digit verification code from your Authenticator app (or enter{" "}
-                    <code className="text-indigo-400 font-bold">123456</code> for demo testing).
+                    Enter the 6-digit verification code from your Authenticator app
+                    {isDemoMode && (
+                      <> (or enter <code className="text-indigo-400 font-bold">123456</code> for demo testing)</>
+                    )}.
                   </p>
                 </div>
 
@@ -186,24 +192,26 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Guide */}
-          <div className="p-3.5 rounded-xl bg-[#0d1322] border border-[#1e293b] text-xs text-slate-400 space-y-1.5">
-            <div className="flex items-center space-x-1.5 text-slate-300 font-medium text-[11px]">
-              <Info className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Default Credentials (Customizable via .env)</span>
+          {/* Quick Demo Credentials Guide (only rendered in demo / development) */}
+          {isDemoMode && (
+            <div className="p-3.5 rounded-xl bg-[#0d1322] border border-[#1e293b] text-xs text-slate-400 space-y-1.5">
+              <div className="flex items-center space-x-1.5 text-slate-300 font-medium text-[11px]">
+                <Info className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Default Credentials (Customizable via .env)</span>
+              </div>
+              <div className="text-[11px] font-mono text-slate-400 space-y-0.5">
+                <p>
+                  Email: <span className="text-slate-200">akter@mahossain.com</span>
+                </p>
+                <p>
+                  Password: <span className="text-slate-200">PortalPass2026!</span>
+                </p>
+                <p>
+                  Demo 2FA Code: <span className="text-indigo-400 font-bold">123456</span>
+                </p>
+              </div>
             </div>
-            <div className="text-[11px] font-mono text-slate-400 space-y-0.5">
-              <p>
-                Email: <span className="text-slate-200">akter@mahossain.com</span>
-              </p>
-              <p>
-                Password: <span className="text-slate-200">PortalPass2026!</span>
-              </p>
-              <p>
-                Demo 2FA Code: <span className="text-indigo-400 font-bold">123456</span>
-              </p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}

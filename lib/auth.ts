@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { authenticator } from "otplib";
@@ -61,21 +62,36 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 }
 
 export function checkPassword(password: string): boolean {
+  if (!password) return false;
   const adminPassword = process.env.PORTAL_ADMIN_PASSWORD || "PortalPass2026!";
-  return password === adminPassword;
+  const a = crypto.createHash("sha256").update(password).digest();
+  const b = crypto.createHash("sha256").update(adminPassword).digest();
+  return crypto.timingSafeEqual(a, b);
 }
 
 export function checkEmail(email: string): boolean {
+  if (!email) return false;
   const adminEmail = process.env.PORTAL_ADMIN_EMAIL || "akter@mahossain.com";
-  return email.trim().toLowerCase() === adminEmail.trim().toLowerCase();
+  const a = crypto.createHash("sha256").update(email.trim().toLowerCase()).digest();
+  const b = crypto.createHash("sha256").update(adminEmail.trim().toLowerCase()).digest();
+  return crypto.timingSafeEqual(a, b);
 }
 
 export function verifyTOTP(token: string): boolean {
-  // Support default emergency bypass code "123456" in dev/mock if user is testing without an authenticator app configured
-  if (token.trim() === "123456") return true;
+  const trimmed = (token || "").trim();
+  if (!trimmed) return false;
+
+  // Emergency bypass "123456" is strictly disallowed in production or when ALLOW_DEMO_2FA !== "true"
+  const isDevOrDemo =
+    process.env.NODE_ENV !== "production" ||
+    process.env.ALLOW_DEMO_2FA === "true";
+
+  if (isDevOrDemo && trimmed === "123456") {
+    return true;
+  }
 
   try {
-    return authenticator.check(token.trim(), ADMIN_2FA_SECRET);
+    return authenticator.check(trimmed, ADMIN_2FA_SECRET);
   } catch (error) {
     console.error("2FA verification error:", error);
     return false;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDriveFileMedia } from "@/lib/googleDrive";
+import { getDriveFileMedia, isValidFileId } from "@/lib/googleDrive";
 import { getCurrentUser } from "@/lib/auth";
 import { Readable } from "stream";
 import {
@@ -19,14 +19,25 @@ export async function GET(
     }
 
     const fileId = params.id;
-    if (!fileId) {
-      return new NextResponse("File ID is required", { status: 400 });
+    if (!isValidFileId(fileId)) {
+      return new NextResponse("Invalid file identifier format", { status: 400 });
     }
 
     const { stream, mimeType, name, size } = await getDriveFileMedia(fileId);
 
     const cleanFileName = sanitizeAndFixFileName(name, undefined, mimeType);
-    const effectiveMime = detectMimeType(cleanFileName, mimeType);
+    let effectiveMime = detectMimeType(cleanFileName, mimeType);
+
+    // Prevent Stored XSS: Never serve executable or HTML types inline
+    let disposition: "inline" | "attachment" = "inline";
+    if (
+      effectiveMime === "text/html" ||
+      effectiveMime.includes("javascript") ||
+      effectiveMime.includes("script")
+    ) {
+      effectiveMime = "text/plain";
+      disposition = "attachment";
+    }
 
     // Convert Node Readable to Web ReadableStream for Next.js Response
     const webStream = Readable.toWeb(stream);
@@ -35,10 +46,17 @@ export async function GET(
     headers.set("Content-Type", effectiveMime);
     headers.set(
       "Content-Disposition",
-      buildContentDisposition(cleanFileName, "inline")
+      buildContentDisposition(cleanFileName, disposition)
     );
     headers.set("Cache-Control", "private, max-age=3600");
     headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "SAMEORIGIN");
+
+    // Strict CSP sandbox for SVG preview rendering
+    if (effectiveMime === "image/svg+xml") {
+      headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
+    }
+
     if (size) {
       headers.set("Content-Length", size.toString());
     }
@@ -48,8 +66,15 @@ export async function GET(
       headers,
     });
   } catch (error: any) {
+    const msg = error?.message || "Failed to preview file";
+    if (msg.includes("not found") || msg.includes("access denied")) {
+      return new NextResponse("File not found or access denied", { status: 404 });
+    }
+    if (msg.includes("Invalid file identifier")) {
+      return new NextResponse("Invalid file identifier", { status: 400 });
+    }
     console.error("API /api/drive/preview error:", error);
-    return new NextResponse(error.message || "Failed to preview file", {
+    return new NextResponse("An error occurred while preparing the preview", {
       status: 500,
     });
   }

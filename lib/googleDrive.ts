@@ -471,20 +471,34 @@ export async function uploadToDrive(params: {
   }
 }
 
+export const SAFE_FILE_ID_REGEX = /^(mock-[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]{10,100})$/;
+
+export function isValidFileId(fileId: string): boolean {
+  if (!fileId || typeof fileId !== "string") return false;
+  return SAFE_FILE_ID_REGEX.test(fileId);
+}
+
 export async function getDriveFileMedia(fileId: string): Promise<{
   stream: Readable;
   mimeType: string;
   name: string;
   size?: number;
 }> {
+  if (!isValidFileId(fileId)) {
+    throw new Error("Invalid file identifier format");
+  }
+
   // Check if buffer is in local cache first
   const cachedBuffer = getMockFileBuffer(fileId);
   if (cachedBuffer) {
     const mockFiles = getMockFiles();
     const mock = mockFiles.find((f) => f.id === fileId);
-    const origName = mock?.originalName || mock?.name || "downloaded-file";
-    const mime = detectMimeType(origName, mock?.mimeType);
-    const cleanName = sanitizeAndFixFileName(mock?.name || origName, origName, mime);
+    if (!mock) {
+      throw new Error("File not found or access denied");
+    }
+    const origName = mock.originalName || mock.name || "downloaded-file";
+    const mime = detectMimeType(origName, mock.mimeType);
+    const cleanName = sanitizeAndFixFileName(mock.name || origName, origName, mime);
     return {
       stream: Readable.from(cachedBuffer),
       mimeType: mime,
@@ -496,13 +510,15 @@ export async function getDriveFileMedia(fileId: string): Promise<{
   if (fileId.startsWith("mock-") || !isGoogleDriveConfigured()) {
     const mockFiles = getMockFiles();
     const mock = mockFiles.find((f) => f.id === fileId);
-    const mime = mock?.mimeType || "application/octet-stream";
-    const name = mock?.name || "document.pdf";
+    if (!mock) {
+      throw new Error("File not found or access denied");
+    }
+    const mime = mock.mimeType || "application/octet-stream";
+    const name = mock.name || "document.pdf";
 
     // Generate lightweight mock content
     let content: Buffer;
     if (mime === "application/pdf") {
-      // Valid minimal PDF document with text for viewer
       const minimalPdf = `%PDF-1.4
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
@@ -524,7 +540,7 @@ BT
 /F1 14 Tf
 (File: ${name}) Tj
 0 -25 Td
-(Category: ${mock?.category || "Personal"}) Tj
+(Category: ${mock.category || "Personal"}) Tj
 ET
 endstream
 endobj
@@ -546,7 +562,6 @@ startxref
 %%EOF`;
       content = Buffer.from(minimalPdf);
     } else if (mime.startsWith("image/")) {
-      // SVG styled image returned as image/svg+xml or PNG placeholder
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -583,13 +598,27 @@ startxref
   }
 
   const drive = getDriveClient();
+  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+  // Strict folder boundary containment verification:
+  // Must be directly inside GOOGLE_DRIVE_FOLDER_ID and not trashed
   const fileMeta = await drive.files.get({
     fileId,
-    fields: "id, name, originalFilename, mimeType, size",
+    fields: "id, name, originalFilename, mimeType, size, parents, trashed",
+    supportsAllDrives: true,
   });
 
+  const isParentValid =
+    folderId &&
+    Array.isArray(fileMeta.data.parents) &&
+    fileMeta.data.parents.includes(folderId);
+
+  if (!isParentValid || fileMeta.data.trashed) {
+    throw new Error("File not found or access denied");
+  }
+
   const response = await drive.files.get(
-    { fileId, alt: "media" },
+    { fileId, alt: "media", supportsAllDrives: true },
     { responseType: "stream" }
   );
 
@@ -616,6 +645,10 @@ export async function updateDriveFileMetadata(
     isFavorite?: boolean;
   }
 ): Promise<PortalFile | null> {
+  if (!isValidFileId(fileId)) {
+    return null;
+  }
+
   if (fileId.startsWith("mock-") || !isGoogleDriveConfigured()) {
     const patch: Partial<PortalFile> = {};
     if (updates.displayName) patch.name = updates.displayName;
@@ -628,11 +661,22 @@ export async function updateDriveFileMetadata(
   }
 
   const drive = getDriveClient();
+  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
   const current = await drive.files.get({
     fileId,
-    fields: "id, name, mimeType, size, createdTime, appProperties, description",
+    fields: "id, name, mimeType, size, createdTime, appProperties, description, parents, trashed",
+    supportsAllDrives: true,
   });
+
+  const isParentValid =
+    folderId &&
+    Array.isArray(current.data.parents) &&
+    current.data.parents.includes(folderId);
+
+  if (!isParentValid || current.data.trashed) {
+    return null;
+  }
 
   const existingAppProps = current.data.appProperties || {};
   const newAppProps: Record<string, string> = { ...existingAppProps };
@@ -655,13 +699,14 @@ export async function updateDriveFileMetadata(
 
   const response = await drive.files.update({
     fileId,
+    supportsAllDrives: true,
     requestBody: {
       name: updates.displayName || current.data.name,
       description: updates.description ?? current.data.description,
       appProperties: newAppProps,
     },
     fields:
-      "id, name, originalFilename, mimeType, size, createdTime, webViewLink, thumbnailLink, appProperties, description",
+      "id, name, originalFilename, mimeType, size, createdTime, webViewLink, thumbnailLink, appProperties, description, parents",
   });
 
   const f = response.data;
@@ -688,14 +733,41 @@ export async function updateDriveFileMetadata(
 }
 
 export async function deleteDriveFile(fileId: string): Promise<boolean> {
+  if (!isValidFileId(fileId)) {
+    return false;
+  }
+
   if (fileId.startsWith("mock-") || !isGoogleDriveConfigured()) {
     return deleteMockFile(fileId);
   }
 
   const drive = getDriveClient();
-  await drive.files.update({
-    fileId,
-    requestBody: { trashed: true },
-  });
-  return true;
+  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+  try {
+    const current = await drive.files.get({
+      fileId,
+      fields: "id, parents, trashed",
+      supportsAllDrives: true,
+    });
+
+    const isParentValid =
+      folderId &&
+      Array.isArray(current.data.parents) &&
+      current.data.parents.includes(folderId);
+
+    if (!isParentValid || current.data.trashed) {
+      return false;
+    }
+
+    await drive.files.update({
+      fileId,
+      supportsAllDrives: true,
+      requestBody: { trashed: true },
+    });
+    return true;
+  } catch (err: any) {
+    console.error("deleteDriveFile error:", err);
+    return false;
+  }
 }

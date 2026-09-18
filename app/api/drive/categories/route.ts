@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("GET /api/drive/categories error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to list categories" }, { status: 500 });
   }
 }
 
@@ -51,11 +51,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const newCategory = (body.category || "").trim();
+    const rawCategory = typeof body.category === "string" ? body.category.trim() : "";
 
-    if (!newCategory) {
+    // Sanitize and validate category string
+    const cleanCategory = rawCategory.replace(/[<>]/g, "").slice(0, 40).trim();
+
+    if (!cleanCategory) {
       return NextResponse.json(
-        { error: "Category name is required" },
+        { error: "Valid category name is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify format (alphanumeric, spaces, basic punctuation)
+    if (!/^[a-zA-Z0-9\s&/_.-]{1,40}$/.test(cleanCategory)) {
+      return NextResponse.json(
+        { error: "Category name contains invalid characters" },
         { status: 400 }
       );
     }
@@ -64,18 +75,26 @@ export async function POST(request: NextRequest) {
       globalThis.__portalCustomCategories = new Set<string>();
     }
 
-    globalThis.__portalCustomCategories.add(newCategory);
+    // Limit maximum number of custom categories to prevent memory exhaustion
+    if (globalThis.__portalCustomCategories.size >= 100) {
+      return NextResponse.json(
+        { error: "Maximum custom categories limit reached (100)" },
+        { status: 400 }
+      );
+    }
+
+    globalThis.__portalCustomCategories.add(cleanCategory);
 
     const categoriesSet = new Set<string>(DEFAULT_CATEGORIES);
     globalThis.__portalCustomCategories.forEach((cat) => categoriesSet.add(cat));
 
     return NextResponse.json({
       success: true,
-      category: newCategory,
+      category: cleanCategory,
       categories: Array.from(categoriesSet),
     });
   } catch (error: any) {
     console.error("POST /api/drive/categories error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to save category" }, { status: 500 });
   }
 }

@@ -1,10 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { getCurrentUser } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
   try {
+    // 1. Authenticated session check
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.redirect(new URL("/login?error=unauthorized_oauth_callback", request.url));
+    }
+
+    // 2. Anti-CSRF OAuth state verification
+    const stateParam = request.nextUrl.searchParams.get("state");
+    const cookieState = request.cookies.get("mah_oauth_state")?.value;
+
+    if (!stateParam || !cookieState) {
+      return NextResponse.redirect(new URL("/?error=missing_oauth_state", request.url));
+    }
+
+    const stateBuf = Buffer.from(stateParam);
+    const cookieBuf = Buffer.from(cookieState);
+
+    if (
+      stateBuf.length !== cookieBuf.length ||
+      !crypto.timingSafeEqual(stateBuf, cookieBuf)
+    ) {
+      return NextResponse.redirect(new URL("/?error=invalid_oauth_state_csrf", request.url));
+    }
+
     const code = request.nextUrl.searchParams.get("code");
     if (!code) {
       return NextResponse.redirect(new URL("/?error=missing_code", request.url));
@@ -41,7 +67,12 @@ export async function GET(request: NextRequest) {
       process.env.GOOGLE_REFRESH_TOKEN = tokens.refresh_token;
     }
 
-    return NextResponse.redirect(new URL("/?connected=google_oauth", request.url));
+    const response = NextResponse.redirect(new URL("/?connected=google_oauth", request.url));
+
+    // Clear the state cookie after successful verification
+    response.cookies.delete("mah_oauth_state");
+
+    return response;
   } catch (error: any) {
     console.error("Google OAuth callback error:", error);
     return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error.message)}`, request.url));

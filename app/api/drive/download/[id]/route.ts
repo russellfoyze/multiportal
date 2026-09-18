@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDriveFileMedia } from "@/lib/googleDrive";
+import { getDriveFileMedia, isValidFileId } from "@/lib/googleDrive";
 import { getCurrentUser } from "@/lib/auth";
 import { Readable } from "stream";
 import {
@@ -19,8 +19,8 @@ export async function GET(
     }
 
     const fileId = params.id;
-    if (!fileId) {
-      return new NextResponse("File ID is required", { status: 400 });
+    if (!isValidFileId(fileId)) {
+      return new NextResponse("Invalid file identifier format", { status: 400 });
     }
 
     const { stream, mimeType, name, size } = await getDriveFileMedia(fileId);
@@ -38,6 +38,7 @@ export async function GET(
       buildContentDisposition(cleanFileName, "attachment")
     );
     headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "DENY");
     headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
     if (size) {
       headers.set("Content-Length", size.toString());
@@ -48,8 +49,15 @@ export async function GET(
       headers,
     });
   } catch (error: any) {
+    const msg = error?.message || "Failed to download file";
+    if (msg.includes("not found") || msg.includes("access denied")) {
+      return new NextResponse("File not found or access denied", { status: 404 });
+    }
+    if (msg.includes("Invalid file identifier")) {
+      return new NextResponse("Invalid file identifier", { status: 400 });
+    }
     console.error("API /api/drive/download error:", error);
-    return new NextResponse(error.message || "Failed to download file", {
+    return new NextResponse("An error occurred while retrieving the file", {
       status: 500,
     });
   }
