@@ -1,21 +1,38 @@
-# Create Windows Desktop Shortcut with Abir Vai Logo
+# Create Windows Desktop Shortcut with Abir Vai Logo (Flindor)
 $ws = New-Object -ComObject WScript.Shell
 
-$currentDir = Split-Path -Parent $PSScriptRoot
-if (-not (Test-Path "$currentDir\package.json")) {
-    $currentDir = (Get-Location).Path
+# Priority list of possible app locations
+$possibleAppDirs = @(
+    "D:\New folder\PORTAL\PORTAL",
+    "C:\Users\Flindor\OneDrive\Desktop\PORTAL",
+    (Split-Path -Parent $PSScriptRoot),
+    (Get-Location).Path,
+    "D:\PORTAL"
+)
+
+$appDir = $null
+foreach ($dir in $possibleAppDirs) {
+    if (Test-Path "$dir\package.json") {
+        $appDir = $dir
+        break
+    }
 }
 
-# Check Desktop directories (both regular Desktop and OneDrive Desktop)
+if (-not $appDir) {
+    $appDir = (Get-Location).Path
+}
+
+$targetBat = "$appDir\portal.bat"
+$targetIcon = "$appDir\portal.ico"
+
+# Target desktop folders
 $destinations = @(
     "C:\Users\Flindor\OneDrive\Desktop",
+    "C:\Users\Flindor\Desktop",
     [Environment]::GetFolderPath('Desktop'),
     "$env:USERPROFILE\OneDrive\Desktop",
     "$env:USERPROFILE\Desktop"
 )
-
-$targetBat = "$currentDir\portal.bat"
-$targetIcon = "$currentDir\portal.ico"
 
 $createdCount = 0
 
@@ -24,14 +41,16 @@ foreach ($desktopPath in $destinations) {
         $shortcutFile = Join-Path $desktopPath "PORTAL.lnk"
         $s = $ws.CreateShortcut($shortcutFile)
         $s.TargetPath = $targetBat
-        $s.WorkingDirectory = $currentDir
+        $s.WorkingDirectory = $appDir
         $s.WindowStyle = 1
-        $s.Description = "MA HOSSAIN Private Document Vault (Abir Vai)"
+        $s.Description = "MA HOSSAIN Private Document Vault - Abir Vai"
         if (Test-Path $targetIcon) {
             $s.IconLocation = "$targetIcon,0"
         }
         $s.Save()
-        Write-Host "Created shortcut: $shortcutFile (Icon: $targetIcon)"
+        Write-Host "Created desktop shortcut: $shortcutFile"
+        Write-Host "  Target: $targetBat"
+        Write-Host "  Icon:   $targetIcon"
         $createdCount++
     }
 }

@@ -1,5 +1,5 @@
 @echo off
-title MA HOSSAIN Private Document Vault
+title MA HOSSAIN Private Document Vault (Abir Vai)
 color 0b
 
 echo ===================================================================
@@ -8,12 +8,17 @@ echo ===================================================================
 echo.
 
 :: 1. Detect and switch to the PORTAL application directory
-if exist "C:\Users\Flindor\OneDrive\Desktop\PORTAL\package.json" (
+:: Prioritize user app location: D:\New folder\PORTAL\PORTAL
+if exist "D:\New folder\PORTAL\PORTAL\package.json" (
+    cd /d "D:\New folder\PORTAL\PORTAL"
+) else if exist "C:\Users\Flindor\OneDrive\Desktop\PORTAL\package.json" (
     cd /d "C:\Users\Flindor\OneDrive\Desktop\PORTAL"
 ) else if exist "%~dp0package.json" (
     cd /d "%~dp0"
 ) else if exist "%~dp0PORTAL\package.json" (
     cd /d "%~dp0PORTAL"
+) else if exist "D:\PORTAL\package.json" (
+    cd /d "D:\PORTAL"
 ) else if exist "%USERPROFILE%\OneDrive\Desktop\PORTAL\package.json" (
     cd /d "%USERPROFILE%\OneDrive\Desktop\PORTAL"
 ) else if exist "%USERPROFILE%\Desktop\PORTAL\package.json" (
@@ -21,19 +26,20 @@ if exist "C:\Users\Flindor\OneDrive\Desktop\PORTAL\package.json" (
 ) else (
     color 0c
     echo [ERROR] Could not locate the PORTAL folder!
-    echo Looked in:
-    echo   - C:\Users\Flindor\OneDrive\Desktop\PORTAL
-    echo   - %~dp0
-    echo   - %~dp0PORTAL
+    echo Checked locations:
+    echo   1. D:\New folder\PORTAL\PORTAL
+    echo   2. C:\Users\Flindor\OneDrive\Desktop\PORTAL
+    echo   3. %~dp0
+    echo   4. D:\PORTAL
     echo.
     pause
     exit /b 1
 )
 
-echo [INFO] App Directory: %CD%
+echo [INFO] App Location: %CD%
 echo.
 
-:: 2. Ensure Desktop shortcut with Abir Vai's custom logo icon exists
+:: 2. Ensure Desktop shortcut with Abir Vai Flindor logo icon is created
 if exist "scripts\create_desktop_shortcut.ps1" (
     powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\create_desktop_shortcut.ps1" >nul 2>&1
 )
@@ -71,7 +77,7 @@ echo.
 :: 5. Automatically open default browser after 2 seconds
 start "" /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
 
-:: 6. Run the Next.js server
+:: 6. Launch the Next.js server
 call npm run dev
 
 if %ERRORLEVEL% NEQ 0 (
