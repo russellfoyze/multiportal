@@ -92,11 +92,13 @@ async function runAudit() {
   let sessionCookie = "";
   try {
     // Step 1: Password step (requires 2FA)
+    const adminTestEmail = process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com";
+
     const loginStep1 = await fetch(`${BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "akter@mahossain.com",
+        email: adminTestEmail,
         password: "PortalPass2026!",
       }),
     });
@@ -108,7 +110,7 @@ async function runAudit() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "akter@mahossain.com",
+        email: adminTestEmail,
         password: "PortalPass2026!",
         totpCode: "000000",
       }),
@@ -120,7 +122,7 @@ async function runAudit() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "akter@mahossain.com",
+        email: adminTestEmail,
         password: "PortalPass2026!",
         totpCode: "123456",
       }),

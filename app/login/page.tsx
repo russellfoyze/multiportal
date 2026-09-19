@@ -19,7 +19,7 @@ export default function LoginPage() {
     process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === "true" ||
     process.env.NODE_ENV !== "production";
 
-  const [email, setEmail] = useState(isDemoMode ? "akter@mahossain.com" : "");
+  const [email, setEmail] = useState(isDemoMode ? "russellfoyze007@gmail.com" : "");
   const [password, setPassword] = useState("");
   const [totpCode, setTotpCode] = useState("");
   const [requires2FA, setRequires2FA] = useState(false);
@@ -165,7 +165,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      placeholder="akter@mahossain.com"
+                      placeholder="russellfoyze007@gmail.com"
                       className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-[#233148] text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
@@ -256,7 +256,7 @@ export default function LoginPage() {
               </div>
               <div className="text-[11px] font-mono text-slate-400 space-y-0.5">
                 <p>
-                  Email: <span className="text-slate-200">akter@mahossain.com</span>
+                  Email: <span className="text-slate-200">russellfoyze007@gmail.com</span>
                 </p>
                 <p>
                   Password: <span className="text-slate-200">PortalPass2026!</span>

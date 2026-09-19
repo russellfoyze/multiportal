@@ -10,16 +10,16 @@ const JWT_SECRET_KEY = new TextEncoder().encode(
 
 const COOKIE_NAME = "mah_portal_session";
 
-// Default credentials for Md Akter Hossain
+// Default credentials for Developer / Admin (Russell Foyze)
 export const DEFAULT_USER: AuthUser = {
-  id: "user-akter-001",
-  email: process.env.PORTAL_ADMIN_EMAIL || "akter@mahossain.com",
-  name: "Md Akter Hossain",
-  avatarInitials: "AH",
+  id: "user-dev-001",
+  email: process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com",
+  name: "Russell Foyze",
+  avatarInitials: "RF",
   twoFactorEnabled: process.env.PORTAL_2FA_ENABLED !== "false",
 };
 
-// 2FA Secret for Md Akter Hossain (Base32 encoded)
+// 2FA Secret for Developer / Admin (Base32 encoded)
 export const ADMIN_2FA_SECRET =
   process.env.PORTAL_2FA_SECRET || "JBSWY3DPEHPK3PXP";
 
@@ -71,7 +71,7 @@ export function checkPassword(password: string): boolean {
 
 export function checkEmail(email: string): boolean {
   if (!email) return false;
-  const adminEmail = process.env.PORTAL_ADMIN_EMAIL || "akter@mahossain.com";
+  const adminEmail = process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com";
   const a = crypto.createHash("sha256").update(email.trim().toLowerCase()).digest();
   const b = crypto.createHash("sha256").update(adminEmail.trim().toLowerCase()).digest();
   return crypto.timingSafeEqual(a, b);
@@ -99,6 +99,6 @@ export function verifyTOTP(token: string): boolean {
 }
 
 export function get2FAOtpAuthUrl(): string {
-  const user = process.env.PORTAL_ADMIN_EMAIL || "akter@mahossain.com";
+  const user = process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com";
   return authenticator.keyuri(user, "MA HOSSAIN Vault", ADMIN_2FA_SECRET);
 }

@@ -25,6 +25,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=invalid_oauth_state_csrf", request.url));
     }
 
+    const errorParam = request.nextUrl.searchParams.get("error");
+    if (errorParam) {
+      return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(errorParam)}`, request.url));
+    }
+
     const code = request.nextUrl.searchParams.get("code");
     if (!code) {
       return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
