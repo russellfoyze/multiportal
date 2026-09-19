@@ -137,7 +137,7 @@ Examples:
 
 Could return:
 
-- Passport - Md Akter Hossain.pdf
+- Passport - Russell Foyze.pdf
 - Passport - Jannatul Ferdous.pdf
 - Old Passport.jpg
 
@@ -242,7 +242,7 @@ Because the portal may contain passports, visa documents and other sensitive inf
 Initial version:
 
 ```text
-User: Md Akter Hossain
+User: Russell Foyze
         |
         +-- Can view own files
         +-- Can search own files
@@ -268,8 +268,8 @@ Each user should only see files assigned to that account.
 Example:
 
 ```text
-Akter Account
-  -> Akter's private files
+Russell Account
+  -> Russell's private files
 
 Jannatul Account
   -> Jannatul's authorised files

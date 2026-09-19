@@ -46,7 +46,7 @@ export async function verifySessionToken(token: string): Promise<AuthUser | null
       id: payload.id as string,
       email: payload.email as string,
       name: payload.name as string,
-      avatarInitials: (payload.avatarInitials as string) || "AH",
+      avatarInitials: (payload.avatarInitials as string) || "RF",
       twoFactorEnabled: Boolean(payload.twoFactorEnabled),
     };
   } catch {

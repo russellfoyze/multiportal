@@ -3,13 +3,13 @@ import { PortalFile } from "./types";
 export const INITIAL_MOCK_FILES: PortalFile[] = [
   {
     id: "mock-1",
-    name: "Passport - Md Akter Hossain.pdf",
-    originalName: "Passport - Md Akter Hossain.pdf",
+    name: "Passport - Russell Foyze.pdf",
+    originalName: "Passport - Russell Foyze.pdf",
     mimeType: "application/pdf",
     size: 2516582,
     formattedSize: "2.4 MB",
     category: "Immigration",
-    tags: ["passport", "akter", "identity", "uk"],
+    tags: ["passport", "russell", "identity", "uk"],
     description: "Personal UK & Bangladesh passport identification document.",
     isFavorite: true,
     createdAt: "2026-09-18T10:00:00.000Z",
@@ -33,8 +33,8 @@ export const INITIAL_MOCK_FILES: PortalFile[] = [
   },
   {
     id: "mock-3",
-    name: "CV - Md Akter Hossain.docx",
-    originalName: "CV - Md Akter Hossain.docx",
+    name: "CV - Russell Foyze.docx",
+    originalName: "CV - Russell Foyze.docx",
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     size: 634880,
     formattedSize: "620 KB",

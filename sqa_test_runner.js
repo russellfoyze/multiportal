@@ -46,7 +46,7 @@ async function runSQASuite() {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'akter@mahossain.com', password: 'WrongPassword999!' }),
+      body: JSON.stringify({ email: 'russellfoyze007@gmail.com', password: 'WrongPassword999!' }),
     });
     assert(res.status === 401, 'Invalid Password', 'Incorrect credentials rejected with HTTP 401');
   } catch (err) {
@@ -58,7 +58,7 @@ async function runSQASuite() {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'akter@mahossain.com', password: 'PortalPass2026!' }),
+      body: JSON.stringify({ email: 'russellfoyze007@gmail.com', password: 'PortalPass2026!' }),
     });
     const data = await res.json();
     assert(data.requires2FA === true, '2FA Challenge', 'Password passed, 2FA challenge correctly requested');
@@ -72,7 +72,7 @@ async function runSQASuite() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'akter@mahossain.com',
+        email: 'russellfoyze007@gmail.com',
         password: 'PortalPass2026!',
         totpCode: '123456',
       }),
@@ -90,7 +90,7 @@ async function runSQASuite() {
       headers: { Cookie: sessionCookie },
     });
     const data = await res.json();
-    assert(data.authenticated === true && data.user.name === 'Md Akter Hossain', 'Session Info', `Authenticated user: ${data.user?.name} (${data.user?.email})`);
+    assert(data.authenticated === true && data.user.name === 'Russell Foyze', 'Session Info', `Authenticated user: ${data.user?.name} (${data.user?.email})`);
   } catch (err) {
     assert(false, 'Session Info', err.message);
   }
@@ -104,10 +104,10 @@ async function runSQASuite() {
 
   // Test 2.1: Upload PDF Passport
   try {
-    const passportBuffer = fs.readFileSync(path.join(demoDir, 'UK_Passport_Md_Akter_Hossain.pdf'));
+    const passportBuffer = fs.readFileSync(path.join(demoDir, 'UK_Passport_Russell_Foyze.pdf'));
     const formData = new FormData();
-    formData.append('file', new Blob([passportBuffer], { type: 'application/pdf' }), 'UK_Passport_Md_Akter_Hossain.pdf');
-    formData.append('displayName', 'Passport - Md Akter Hossain.pdf');
+    formData.append('file', new Blob([passportBuffer], { type: 'application/pdf' }), 'UK_Passport_Russell_Foyze.pdf');
+    formData.append('displayName', 'Passport - Russell Foyze.pdf');
     formData.append('category', 'Passport');
     formData.append('tags', 'passport,uk,identity');
     formData.append('description', 'Official British/BD passport identity copy');
@@ -292,10 +292,10 @@ async function runSQASuite() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Cookie: sessionCookie },
       body: JSON.stringify({
-        displayName: 'Passport - Md Akter Hossain (Updated).pdf',
+        displayName: 'Passport - Russell Foyze (Updated).pdf',
         category: 'Immigration',
         isFavorite: true,
-        tags: ['passport', 'akter', 'verified'],
+        tags: ['passport', 'russell', 'verified'],
       }),
     });
     const data = await res.json();

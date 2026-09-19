@@ -264,7 +264,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g. Passport - Md Akter Hossain.pdf"
+              placeholder="e.g. Passport - Russell Foyze.pdf"
               className="w-full px-3.5 py-2 rounded-xl bg-[#0d1322] border border-[#233148] text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
             <p className="text-[11px] text-slate-400 mt-1">

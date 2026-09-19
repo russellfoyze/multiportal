@@ -36,14 +36,14 @@ An automated end-to-end Software Quality Assurance (SQA) test suite was executed
 | **TC-1.3** | 2FA Step-Up Trigger | Valid credentials trigger `{ requires2FA: true }` challenge | 🟢 PASS |
 | **TC-1.4** | TOTP Verification | Entering valid 2FA code returns HTTP 200 and secure session cookie | 🟢 PASS |
 | **TC-1.5** | Session Cookie Security | Cookie `mah_portal_session` contains `httpOnly`, `sameSite`, and `secure` | 🟢 PASS |
-| **TC-1.6** | Profile Verification | `/api/auth/session` returns authorized user `Md Akter Hossain` | 🟢 PASS |
+| **TC-1.6** | Profile Verification | `/api/auth/session` returns authorized user `Russell Foyze` | 🟢 PASS |
 
 ---
 
 ### Suite 2: Multi-Type File Uploads
 | Test ID | Test Name | File Type | Result |
 | :--- | :--- | :--- | :--- |
-| **TC-2.1** | Upload PDF Document | `UK_Passport_Md_Akter_Hossain.pdf` with tags and category `Passport` | 🟢 PASS |
+| **TC-2.1** | Upload PDF Document | `UK_Passport_Russell_Foyze.pdf` with tags and category `Passport` | 🟢 PASS |
 | **TC-2.2** | Upload Photo | `Skilled_Worker_BRP_Card.jpg` with category `Immigration` | 🟢 PASS |
 | **TC-2.3** | Upload Word Document | `Software_Engineer_CV_2026.docx` with category `CV` | 🟢 PASS |
 

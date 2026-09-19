@@ -116,7 +116,39 @@ export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<str
   }
 }
 
+export function syncEnvFromDisk(): void {
+  try {
+    const envPath = path.join(process.cwd(), ".env.local");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf-8");
+      const parseVar = (key: string) => {
+        const m = content.match(new RegExp(`^${key}=["']?([^"'\\r\\n]*)["']?`, "m"));
+        return m ? m[1].trim() : undefined;
+      };
+      const keys = [
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "GOOGLE_REFRESH_TOKEN",
+        "GOOGLE_DRIVE_FOLDER_ID",
+        "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+        "GOOGLE_PRIVATE_KEY",
+        "PORTAL_ADMIN_EMAIL",
+        "GOOGLE_DRIVE_USER_EMAIL",
+      ];
+      for (const k of keys) {
+        const val = parseVar(k);
+        if (val !== undefined) {
+          process.env[k] = val;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error syncing env from disk:", e);
+  }
+}
+
 export function isGoogleDriveConfigured(): boolean {
+  syncEnvFromDisk();
   const hasServiceAccount = Boolean(
     (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || process.env.GOOGLE_CLIENT_EMAIL) &&
     process.env.GOOGLE_PRIVATE_KEY &&
@@ -131,6 +163,7 @@ export function isGoogleDriveConfigured(): boolean {
 }
 
 export function getDriveConfigStatus(): DriveConfigStatus {
+  syncEnvFromDisk();
   const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
   const email =
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || process.env.GOOGLE_CLIENT_EMAIL;
@@ -169,32 +202,14 @@ export function resetCachedDriveClient(): void {
 }
 
 export function getGoogleOAuthCredentials(): { clientId: string; clientSecret: string } {
+  syncEnvFromDisk();
   let clientId = process.env.GOOGLE_CLIENT_ID || "";
   let clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
-
-  try {
-    const envPath = path.join(process.cwd(), ".env.local");
-    if (fs.existsSync(envPath)) {
-      const content = fs.readFileSync(envPath, "utf-8");
-      const idMatch = content.match(/^GOOGLE_CLIENT_ID=["']?([^"'\r\n]+)["']?/m);
-      const secretMatch = content.match(/^GOOGLE_CLIENT_SECRET=["']?([^"'\r\n]+)["']?/m);
-      if (idMatch && idMatch[1]) {
-        clientId = idMatch[1].trim();
-        process.env.GOOGLE_CLIENT_ID = clientId;
-      }
-      if (secretMatch && secretMatch[1]) {
-        clientSecret = secretMatch[1].trim();
-        process.env.GOOGLE_CLIENT_SECRET = clientSecret;
-      }
-    }
-  } catch (e) {
-    console.error("Error reading OAuth credentials from .env.local:", e);
-  }
-
   return { clientId, clientSecret };
 }
 
 export function getDriveClient(): drive_v3.Drive {
+  syncEnvFromDisk();
   if (cachedDriveClient) {
     return cachedDriveClient;
   }

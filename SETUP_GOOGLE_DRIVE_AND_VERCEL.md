@@ -56,7 +56,7 @@ GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAAS
 GOOGLE_DRIVE_FOLDER_ID="1aBcDeFgHiJkLmNoPqRsTuVwXyZ"
 
 # Admin Authentication
-PORTAL_ADMIN_EMAIL="akter@mahossain.com"
+PORTAL_ADMIN_EMAIL="russellfoyze007@gmail.com"
 PORTAL_ADMIN_PASSWORD="YourSecurePassword2026!"
 
 # Two-Factor Authentication (TOTP)
@@ -97,7 +97,7 @@ Visit `http://localhost:3000` in your browser.
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `vault-service@...iam.gserviceaccount.com` | Service account email |
 | `GOOGLE_PRIVATE_KEY` | `"-----BEGIN PRIVATE KEY-----\n..."` | Full private key with quotes |
 | `GOOGLE_DRIVE_FOLDER_ID` | `1aBcDeFg...` | ID of your shared Google Drive folder |
-| `PORTAL_ADMIN_EMAIL` | `akter@mahossain.com` | Your portal login email |
+| `PORTAL_ADMIN_EMAIL` | `russellfoyze007@gmail.com` | Your portal login email |
 | `PORTAL_ADMIN_PASSWORD` | `[Your Vault Password]` | Your secure login password |
 | `PORTAL_2FA_SECRET` | `JBSWY3DPEHPK3PXP` | 16-char Base32 Authenticator secret |
 | `PORTAL_2FA_ENABLED` | `true` | Enables/disables TOTP verification |

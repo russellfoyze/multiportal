@@ -84,11 +84,11 @@ $subBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArg
 $rectSub = New-Object System.Drawing.RectangleF(10, 168, 236, 26)
 $g.DrawString("PRIVATE VAULT", $fontSub, $subBrush, $rectSub, $formatCenter)
 
-# Small "ABIR" accent badge at bottom
-$fontAbir = New-Object System.Drawing.Font($fontFam, 8, [System.Drawing.FontStyle]::Bold)
-$abirBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(170, 224, 231, 255))
-$rectAbir = New-Object System.Drawing.RectangleF(10, 196, 236, 20)
-$g.DrawString("AKTER HOSSAIN ABIR", $fontAbir, $abirBrush, $rectAbir, $formatCenter)
+# Small "RUSSELL" accent badge at bottom
+$fontSub2 = New-Object System.Drawing.Font($fontFam, 8, [System.Drawing.FontStyle]::Bold)
+$sub2Brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(170, 224, 231, 255))
+$rectSub2 = New-Object System.Drawing.RectangleF(10, 196, 236, 20)
+$g.DrawString("RUSSELL FOYZE", $fontSub2, $sub2Brush, $rectSub2, $formatCenter)
 
 # Save high-res PNG
 $bmp.Save($outputPathPng, [System.Drawing.Imaging.ImageFormat]::Png)

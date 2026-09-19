@@ -26,7 +26,7 @@ BT
 (BRITISH & BANGLADESH PASSPORT VAULT) Tj
 0 -35 Td
 /F1 12 Tf
-(Holder Name: Md Akter Hossain) Tj
+(Holder Name: Russell Foyze) Tj
 0 -20 Td
 (Document Type: Official Passport Copy) Tj
 0 -20 Td
@@ -53,7 +53,7 @@ startxref
 580
 %%EOF`;
 
-fs.writeFileSync(path.join(demoDir, 'UK_Passport_Md_Akter_Hossain.pdf'), Buffer.from(passportPdf));
+fs.writeFileSync(path.join(demoDir, 'UK_Passport_Russell_Foyze.pdf'), Buffer.from(passportPdf));
 
 // 2. Valid Minimal JPEG Image (Single pixel JPEG or valid binary)
 // 1x1 base64 transparent/black JPEG header
@@ -61,7 +61,7 @@ const minimalJpgBase64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP////////////////////
 fs.writeFileSync(path.join(demoDir, 'Skilled_Worker_BRP_Card.jpg'), Buffer.from(minimalJpgBase64, 'base64'));
 
 // 3. Realistic Demo Document (DOCX dummy)
-const docxDummy = `PK\x03\x04\x14\x00\x00\x00\x08\x00word/document.xml\nMA HOSSAIN Curriculum Vitae - Lead Software Engineer\nUniversity of Hertfordshire Graduate`;
+const docxDummy = `PK\x03\x04\x14\x00\x00\x00\x08\x00word/document.xml\nRussell Foyze Curriculum Vitae - Lead Software Engineer\nUniversity of Hertfordshire Graduate`;
 fs.writeFileSync(path.join(demoDir, 'Software_Engineer_CV_2026.docx'), Buffer.from(docxDummy));
 
 // 4. Car Insurance Certificate PDF
@@ -86,7 +86,7 @@ BT
 /F1 12 Tf
 (Vehicle: Nissan Leaf Acenta) Tj
 0 -20 Td
-(Policy Holder: Md Akter Hossain) Tj
+(Policy Holder: Russell Foyze) Tj
 ET
 endstream
 endobj

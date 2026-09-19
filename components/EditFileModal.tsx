@@ -256,7 +256,7 @@ export const EditFileModal: React.FC<EditFileModalProps> = ({
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              placeholder="e.g. passport, identity, akter"
+              placeholder="e.g. passport, identity, russell"
               className="w-full px-3.5 py-2 rounded-xl bg-[#0d1322] border border-[#233148] text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>

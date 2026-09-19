@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "MA HOSSAIN — Private Document Portal",
-  description: "Secure private document vault powered by Google Drive API for Md Akter Hossain.",
+  description: "Secure private document vault powered by Google Drive API for Russell Foyze.",
   icons: {
     icon: "/favicon.ico",
   },

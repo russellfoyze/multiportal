@@ -1,4 +1,4 @@
-# Create Windows Desktop Shortcut with Abir Vai Logo (Flindor)
+# Create Windows Desktop Shortcut for MA HOSSAIN Vault
 $ws = New-Object -ComObject WScript.Shell
 
 # Priority list of possible app locations
@@ -43,7 +43,7 @@ foreach ($desktopPath in $destinations) {
         $s.TargetPath = $targetBat
         $s.WorkingDirectory = $appDir
         $s.WindowStyle = 1
-        $s.Description = "MA HOSSAIN Private Document Vault - Abir Vai"
+        $s.Description = "MA HOSSAIN Private Document Vault"
         if (Test-Path $targetIcon) {
             $s.IconLocation = "$targetIcon,0"
         }

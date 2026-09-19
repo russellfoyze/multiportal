@@ -1,9 +1,9 @@
 @echo off
-title MA HOSSAIN Private Document Vault (Abir Vai)
+title MA HOSSAIN Private Document Vault
 color 0b
 
 echo ===================================================================
-echo   MA HOSSAIN - Private Document Portal & Vault (Abir Vai)
+echo   MA HOSSAIN - Private Document Portal & Vault
 echo ===================================================================
 echo.
 
@@ -39,7 +39,7 @@ if exist "D:\New folder\PORTAL\PORTAL\package.json" (
 echo [INFO] App Location: %CD%
 echo.
 
-:: 2. Ensure Desktop shortcut with Abir Vai Flindor logo icon is created
+:: 2. Ensure Desktop shortcut with portal logo icon is created
 if exist "scripts\create_desktop_shortcut.ps1" (
     powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\create_desktop_shortcut.ps1" >nul 2>&1
 )
