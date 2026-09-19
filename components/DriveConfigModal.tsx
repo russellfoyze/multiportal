@@ -78,22 +78,25 @@ export const DriveConfigModal: React.FC<DriveConfigModalProps> = ({
             </div>
           </div>
 
-          {/* 1-Click Connect Google Account for 15GB Uploads */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/60 to-purple-950/60 border border-indigo-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          {/* 1-Click Connect / Switch Google Account */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/70 to-purple-950/70 border border-indigo-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
             <div>
               <p className="text-xs font-bold text-white flex items-center space-x-1.5">
-                <span>Personal Google Drive (15 GB Free Storage)</span>
+                <HardDrive className="w-4 h-4 text-indigo-400" />
+                <span>1-Click Google Drive Connection</span>
               </p>
               <p className="text-[11px] text-slate-300 mt-0.5">
-                Authorize your personal Google account in 1 click to unlock direct file uploads.
+                {isConfigured
+                  ? "Click below to change the Google account or switch to a different Google Drive user."
+                  : "Connect your personal Google account in 1 click to unlock uploads directly into your Google Drive."}
               </p>
             </div>
             <a
               href="/api/auth/google"
-              className="inline-flex items-center justify-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-md shadow-indigo-600/30 transition-all flex-shrink-0"
+              className="inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-xs font-semibold text-white shadow-md shadow-indigo-600/30 transition-all flex-shrink-0"
             >
               <HardDrive className="w-4 h-4" />
-              <span>Connect Google Drive</span>
+              <span>{isConfigured ? "Change / Switch Google User" : "Connect Google Drive (1-Click)"}</span>
             </a>
           </div>
 
@@ -101,7 +104,7 @@ export const DriveConfigModal: React.FC<DriveConfigModalProps> = ({
           {isConfigured && (
             <div className="bg-[#0d1322] border border-[#1e293b] rounded-xl p-4 text-xs space-y-2.5">
               <div>
-                <span className="text-slate-400 block mb-0.5">Service Account:</span>
+                <span className="text-slate-400 block mb-0.5">Connected Account / Storage:</span>
                 <span className="text-slate-200 font-mono bg-[#162032] px-2 py-1 rounded">
                   {status?.serviceAccountEmail}
                 </span>
@@ -114,6 +117,20 @@ export const DriveConfigModal: React.FC<DriveConfigModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Account Switch Tip */}
+          <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-[11px] text-slate-300 space-y-1">
+            <p className="font-semibold text-indigo-300">
+              How to Change Google Drive User in 1 Click:
+            </p>
+            <p className="text-slate-300 leading-relaxed">
+              1. Click <strong>Change / Switch Google User</strong> above.
+              <br />
+              2. Google will display the account picker — choose or sign into your new Google account.
+              <br />
+              3. Click <strong>Allow</strong>. The portal automatically updates tokens and connects to the new user's Google Drive immediately!
+            </p>
+          </div>
 
           {/* Setup Instructions for Vercel */}
           <div className="space-y-3">

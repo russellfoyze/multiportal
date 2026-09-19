@@ -78,6 +78,10 @@ export function getDriveConfigStatus(): DriveConfigStatus {
 
 let cachedDriveClient: drive_v3.Drive | null = null;
 
+export function resetCachedDriveClient(): void {
+  cachedDriveClient = null;
+}
+
 export function getDriveClient(): drive_v3.Drive {
   if (cachedDriveClient) {
     return cachedDriveClient;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { getCurrentUser } from "@/lib/auth";
+import { resetCachedDriveClient } from "@/lib/googleDrive";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -65,6 +66,7 @@ export async function GET(request: NextRequest) {
 
       fs.writeFileSync(envPath, envContent, "utf-8");
       process.env.GOOGLE_REFRESH_TOKEN = tokens.refresh_token;
+      resetCachedDriveClient();
     }
 
     const response = NextResponse.redirect(new URL("/?connected=google_oauth", request.url));
