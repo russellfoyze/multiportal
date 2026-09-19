@@ -39,6 +39,7 @@ export interface PortalFile {
   formattedDate: string;
   driveViewLink?: string;
   thumbnailLink?: string;
+  folderName?: string;
   isMock?: boolean;
 }
 

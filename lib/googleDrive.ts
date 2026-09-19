@@ -116,6 +116,79 @@ export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<str
   }
 }
 
+export async function getOrCreateSubfolder(
+  drive: drive_v3.Drive,
+  parentFolderId: string,
+  subfolderName: string
+): Promise<string> {
+  const cleanName =
+    subfolderName.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").trim() || "Uploaded Folder";
+
+  // 1. Search for existing subfolder with this name inside parentFolderId
+  try {
+    const listRes = await drive.files.list({
+      q: `'${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '${cleanName.replace(/'/g, "\\'")}' and trashed = false`,
+      fields: "files(id, name)",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      pageSize: 5,
+    });
+
+    if (listRes.data.files && listRes.data.files.length > 0) {
+      return listRes.data.files[0].id!;
+    }
+  } catch (err) {
+    console.warn(`Error searching for subfolder ${cleanName}:`, err);
+  }
+
+  // 2. Create subfolder inside parentFolderId
+  const createRes = await drive.files.create({
+    supportsAllDrives: true,
+    requestBody: {
+      name: cleanName,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: [parentFolderId],
+      description: `Folder uploaded to MultiPortal vault`,
+    },
+    fields: "id, name",
+  });
+
+  return createRes.data.id!;
+}
+
+export async function verifyFileInsideVault(
+  drive: drive_v3.Drive,
+  vaultFolderId: string,
+  parents?: string[] | null
+): Promise<boolean> {
+  if (!vaultFolderId || !Array.isArray(parents) || parents.length === 0) {
+    return false;
+  }
+  if (parents.includes(vaultFolderId)) {
+    return true;
+  }
+  // Check if any parent folder is a subfolder inside vaultFolderId
+  for (const parentId of parents) {
+    try {
+      const parentFolder = await drive.files.get({
+        fileId: parentId,
+        fields: "id, parents, trashed",
+        supportsAllDrives: true,
+      });
+      if (
+        parentFolder.data.parents &&
+        parentFolder.data.parents.includes(vaultFolderId) &&
+        !parentFolder.data.trashed
+      ) {
+        return true;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return false;
+}
+
 export function syncEnvFromDisk(): void {
   try {
     const envPath = path.join(process.cwd(), ".env.local");
@@ -329,14 +402,42 @@ export async function listPortalFiles(params: {
     const drive = getDriveClient();
     const folderId = await getOrCreateVaultFolder(drive);
 
-    let q = `'${folderId}' in parents and trashed = false`;
+    // Fetch any subfolders under vault folder
+    const subfolderIds: string[] = [];
+    const subfolderMap = new Map<string, string>();
+    try {
+      const subRes = await drive.files.list({
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+        q: `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+        fields: "files(id, name)",
+        pageSize: 100,
+      });
+      if (subRes.data.files) {
+        for (const sf of subRes.data.files) {
+          if (sf.id && sf.name) {
+            subfolderIds.push(sf.id);
+            subfolderMap.set(sf.id, sf.name);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to list subfolders:", e);
+    }
+
+    let parentClauses = `'${folderId}' in parents`;
+    for (const sfId of subfolderIds) {
+      parentClauses += ` or '${sfId}' in parents`;
+    }
+
+    const q = `(${parentClauses}) and mimeType != 'application/vnd.google-apps.folder' and trashed = false`;
 
     const response = await drive.files.list({
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
       q,
       fields:
-        "files(id, name, originalFilename, mimeType, size, createdTime, modifiedTime, webViewLink, webContentLink, thumbnailLink, appProperties, description)",
+        "files(id, name, originalFilename, mimeType, size, createdTime, modifiedTime, webViewLink, webContentLink, thumbnailLink, appProperties, description, parents)",
       orderBy: "modifiedTime desc",
       pageSize: 200,
     });
@@ -356,6 +457,17 @@ export async function listPortalFiles(params: {
         trueMime
       );
 
+      const fileParents = file.parents || [];
+      let detectedFolderName = appProps.folderName;
+      if (!detectedFolderName) {
+        for (const pId of fileParents) {
+          if (subfolderMap.has(pId)) {
+            detectedFolderName = subfolderMap.get(pId);
+            break;
+          }
+        }
+      }
+
       return {
         id: file.id || "",
         name: cleanName,
@@ -367,6 +479,7 @@ export async function listPortalFiles(params: {
         tags,
         description: appProps.description || file.description || "",
         isFavorite: appProps.isFavorite === "true",
+        folderName: detectedFolderName || undefined,
         createdAt: file.createdTime || new Date().toISOString(),
         formattedDate: formatPortalDate(file.createdTime),
         driveViewLink: file.webViewLink || undefined,
@@ -492,6 +605,7 @@ export async function uploadToDrive(params: {
   category: FileCategory;
   tags: string[];
   description?: string;
+  subfolderName?: string;
 }): Promise<PortalFile> {
   const trueMime = detectMimeType(params.fileName, params.mimeType);
   const cleanName = sanitizeAndFixFileName(
@@ -503,7 +617,7 @@ export async function uploadToDrive(params: {
   if (!isGoogleDriveConfigured()) {
     // Add to mock store
     const newFile: PortalFile = {
-      id: `mock-${Date.now()}`,
+      id: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: cleanName,
       originalName: params.fileName,
       mimeType: trueMime,
@@ -513,6 +627,7 @@ export async function uploadToDrive(params: {
       tags: params.tags,
       description: params.description || "",
       isFavorite: false,
+      folderName: params.subfolderName?.trim() || undefined,
       createdAt: new Date().toISOString(),
       formattedDate: formatPortalDate(new Date().toISOString()),
       isMock: true,
@@ -523,33 +638,43 @@ export async function uploadToDrive(params: {
 
   try {
     const drive = getDriveClient();
-    const folderId = await getOrCreateVaultFolder(drive);
+    const vaultFolderId = await getOrCreateVaultFolder(drive);
+    let targetFolderId = vaultFolderId;
+
+    if (params.subfolderName && params.subfolderName.trim()) {
+      targetFolderId = await getOrCreateSubfolder(drive, vaultFolderId, params.subfolderName.trim());
+    }
 
     const readable = new Readable();
     readable.push(params.buffer);
     readable.push(null);
+
+    const appProperties: Record<string, string> = {
+      displayName: cleanName,
+      category: params.category,
+      tags: params.tags.join(","),
+      description: params.description || "",
+      isFavorite: "false",
+    };
+    if (params.subfolderName && params.subfolderName.trim()) {
+      appProperties.folderName = params.subfolderName.trim();
+    }
 
     const response = await drive.files.create({
       supportsAllDrives: true,
       requestBody: {
         name: cleanName,
         originalFilename: params.fileName,
-        parents: [folderId],
+        parents: [targetFolderId],
         description: params.description || "",
-        appProperties: {
-          displayName: cleanName,
-          category: params.category,
-          tags: params.tags.join(","),
-          description: params.description || "",
-          isFavorite: "false",
-        },
+        appProperties,
       },
       media: {
         mimeType: trueMime,
         body: readable,
       },
       fields:
-        "id, name, originalFilename, mimeType, size, createdTime, webViewLink, thumbnailLink, appProperties, description",
+        "id, name, originalFilename, mimeType, size, createdTime, webViewLink, thumbnailLink, appProperties, description, parents",
     });
 
     const file = response.data;
@@ -566,6 +691,7 @@ export async function uploadToDrive(params: {
       tags: params.tags,
       description: params.description || "",
       isFavorite: false,
+      folderName: params.subfolderName?.trim() || undefined,
       createdAt: file.createdTime || new Date().toISOString(),
       formattedDate: formatPortalDate(file.createdTime),
       driveViewLink: file.webViewLink || undefined,
@@ -582,7 +708,7 @@ export async function uploadToDrive(params: {
         "Google Service Account has 0 quota on personal Google Drive folder. Storing in local vault session."
       );
       const newFile: PortalFile = {
-        id: `mock-${Date.now()}`,
+        id: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         name: cleanName,
         originalName: params.fileName,
         mimeType: trueMime,
@@ -592,6 +718,7 @@ export async function uploadToDrive(params: {
         tags: params.tags,
         description: params.description || "",
         isFavorite: false,
+        folderName: params.subfolderName?.trim() || undefined,
         createdAt: new Date().toISOString(),
         formattedDate: formatPortalDate(new Date().toISOString()),
         isMock: true,
@@ -746,10 +873,11 @@ startxref
     throw new Error("File not found or access denied");
   }
 
-  const isParentValid =
-    folderId &&
-    Array.isArray(fileMeta.data.parents) &&
-    fileMeta.data.parents.includes(folderId);
+  const isParentValid = await verifyFileInsideVault(
+    drive,
+    folderId,
+    fileMeta.data.parents
+  );
 
   if (!isParentValid || fileMeta.data.trashed) {
     throw new Error("File not found or access denied");
@@ -812,10 +940,11 @@ export async function updateDriveFileMetadata(
     return null;
   }
 
-  const isParentValid =
-    folderId &&
-    Array.isArray(current.data.parents) &&
-    current.data.parents.includes(folderId);
+  const isParentValid = await verifyFileInsideVault(
+    drive,
+    folderId,
+    current.data.parents
+  );
 
   if (!isParentValid || current.data.trashed) {
     return null;
@@ -894,10 +1023,11 @@ export async function deleteDriveFile(fileId: string): Promise<boolean> {
       supportsAllDrives: true,
     });
 
-    const isParentValid =
-      folderId &&
-      Array.isArray(current.data.parents) &&
-      current.data.parents.includes(folderId);
+    const isParentValid = await verifyFileInsideVault(
+      drive,
+      folderId,
+      current.data.parents
+    );
 
     if (!isParentValid || current.data.trashed) {
       return false;

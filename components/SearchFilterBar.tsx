@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Upload, ChevronDown, X } from "lucide-react";
+import { Search, Upload, ChevronDown, X, FolderUp } from "lucide-react";
 import { FileTypeFilter, FileCategory, DEFAULT_CATEGORIES } from "@/lib/types";
 
 interface SearchFilterBarProps {
@@ -12,6 +12,7 @@ interface SearchFilterBarProps {
   selectedCategory: FileCategory;
   onCategoryChange: (cat: FileCategory) => void;
   onOpenUpload: () => void;
+  onOpenUploadFolder?: () => void;
   availableCategories?: string[];
 }
 
@@ -32,6 +33,7 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
   selectedCategory,
   onCategoryChange,
   onOpenUpload,
+  onOpenUploadFolder,
   availableCategories,
 }) => {
   const [categories, setCategories] = useState<string[]>(
@@ -100,14 +102,26 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
           </div>
         </div>
 
-        {/* Upload Button */}
+        {/* Upload File Button */}
         <button
           onClick={onOpenUpload}
-          className="flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
         >
           <Upload className="w-4 h-4 stroke-[2.5]" />
-          <span>Upload</span>
+          <span>Upload File</span>
         </button>
+
+        {/* Upload Folder Button */}
+        {onOpenUploadFolder && (
+          <button
+            onClick={onOpenUploadFolder}
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 hover:text-white border border-amber-500/40 text-sm font-semibold shadow-lg shadow-amber-600/10 transition-all hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+            title="Upload a complete folder of documents into MultiPortal"
+          >
+            <FolderUp className="w-4 h-4 text-amber-400 stroke-[2.2]" />
+            <span>Upload Folder</span>
+          </button>
+        )}
       </div>
 
       {/* Dynamic Horizontal Category Chips */}

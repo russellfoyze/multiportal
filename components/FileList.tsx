@@ -509,13 +509,21 @@ export const FileList: React.FC<FileListProps> = ({
                               </div>
                             </div>
 
-                            {/* Subtitle: Size · Category */}
-                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-1">
+                            {/* Subtitle: Size · Category · Folder */}
+                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-1 flex-wrap">
                               <span>{file.formattedSize}</span>
                               <span>·</span>
-                              <span className="text-slate-300 truncate max-w-[80px]">
+                              <span className="text-slate-300 truncate max-w-[75px]">
                                 {file.category}
                               </span>
+                              {file.folderName && (
+                                <>
+                                  <span>·</span>
+                                  <span className="text-amber-400/90 font-medium truncate max-w-[85px]" title={`Folder: ${file.folderName}`}>
+                                    📁 {file.folderName}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -571,6 +579,14 @@ export const FileList: React.FC<FileListProps> = ({
                       <span className="text-slate-300 font-medium">
                         {file.category}
                       </span>
+                      {file.folderName && (
+                        <>
+                          <span>·</span>
+                          <span className="text-[11px] font-medium text-amber-400 bg-amber-950/40 border border-amber-800/50 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                            📁 {file.folderName}
+                          </span>
+                        </>
+                      )}
                       {file.tags.length > 0 && (
                         <>
                           <span>·</span>

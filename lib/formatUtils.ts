@@ -205,3 +205,15 @@ export function buildContentDisposition(
 
   return `${disposition}; filename="${asciiName}"; filename*=UTF-8''${utf8Name}`;
 }
+
+/**
+ * Human-readable file size formatter (e.g. '12.4 MB')
+ */
+export function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const val = bytes / Math.pow(k, i);
+  return `${val >= 10 || i === 0 ? val.toFixed(0) : val.toFixed(1)} ${sizes[i]}`;
+}

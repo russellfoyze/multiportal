@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Rate limiting: max 30 uploads per minute per user/IP
+    // Rate limiting: max 200 uploads per minute per user/IP (supports batch/folder uploads)
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
     const rateCheck = checkRateLimit(`upload_${user.id}_${ip}`, {
-      limit: 30,
+      limit: 200,
       windowMs: 60 * 1000,
     });
 
@@ -49,6 +49,10 @@ export async function POST(request: NextRequest) {
     const rawCategory = (formData.get("category") as string) || "Other";
     const rawTags = (formData.get("tags") as string) || "";
     const rawDescription = (formData.get("description") as string) || "";
+    const rawFolderName =
+      (formData.get("folderName") as string) ||
+      (formData.get("subfolderName") as string) ||
+      "";
 
     if (!file) {
       return NextResponse.json(
@@ -113,6 +117,7 @@ export async function POST(request: NextRequest) {
 
     const category = (sanitizeInput(rawCategory, 50) || "Other") as FileCategory;
     const description = sanitizeInput(rawDescription, 2000);
+    const folderName = sanitizeInput(rawFolderName, 100);
 
     const uploadedFile = await uploadToDrive({
       buffer,
@@ -122,6 +127,7 @@ export async function POST(request: NextRequest) {
       category,
       tags,
       description,
+      subfolderName: folderName || undefined,
     });
 
     return NextResponse.json({ success: true, file: uploadedFile });

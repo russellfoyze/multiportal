@@ -46,6 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
   const [previewFile, setPreviewFile] = useState<PortalFile | null>(null);
   const [editingFile, setEditingFile] = useState<PortalFile | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadInitialMode, setUploadInitialMode] = useState<"file" | "folder">("file");
   const [isDriveConfigOpen, setIsDriveConfigOpen] = useState(false);
   const [driveStatus, setDriveStatus] = useState<DriveConfigStatus | null>(null);
   const [driveApiError, setDriveApiError] = useState<string | null>(null);
@@ -170,6 +171,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
 
   const handleUploadSuccess = (newFile: PortalFile) => {
     setFiles((prev) => [newFile, ...prev]);
+    fetchFiles();
+    fetchCategories();
+  };
+
+  const handleFolderUploaded = (_folderName: string, _count: number) => {
     fetchFiles();
     fetchCategories();
   };
@@ -317,7 +323,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
             onTypeChange={setSelectedType}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
-            onOpenUpload={() => setIsUploadOpen(true)}
+            onOpenUpload={() => {
+              setUploadInitialMode("file");
+              setIsUploadOpen(true);
+            }}
+            onOpenUploadFolder={() => {
+              setUploadInitialMode("folder");
+              setIsUploadOpen(true);
+            }}
             availableCategories={categories}
           />
 
@@ -349,6 +362,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUploadSuccess={handleUploadSuccess}
+        onFolderUploaded={handleFolderUploaded}
+        initialMode={uploadInitialMode}
         availableCategories={categories}
         onCategoryAdded={handleCategoryAdded}
       />
