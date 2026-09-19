@@ -60,6 +60,16 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: User Profile & Quick Actions */}
         <div className="flex items-center space-x-4" ref={menuRef}>
+          {/* 1-Click Connect / Switch Google Drive */}
+          <a
+            href="/api/auth/google"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-600/30 transition-all hover:scale-105"
+            title="Click to authorize or switch to any Google Drive account"
+          >
+            <HardDrive className="w-3.5 h-3.5" />
+            <span>{isDriveConfigured ? "Switch Google Drive" : "Connect Google Drive (1-Click)"}</span>
+          </a>
+
           {/* Drive Status Pill */}
           <button
             onClick={onOpenDriveModal}
@@ -70,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <HardDrive className="w-3.5 h-3.5" />
-            <span>{isDriveConfigured ? "Google Drive: Live" : "Google Drive: Demo Mode"}</span>
+            <span>{isDriveConfigured ? "Drive: Live Vault" : "Drive: Demo Mode"}</span>
           </button>
 
           {/* User Profile Pill */}
@@ -103,6 +113,13 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 <div className="py-1">
+                  <a
+                    href="/api/auth/google"
+                    className="w-full flex items-center space-x-2 px-3 py-2 text-xs font-medium text-indigo-300 hover:text-white hover:bg-[#1a2335] rounded-lg transition-colors"
+                  >
+                    <HardDrive className="w-4 h-4 text-indigo-400" />
+                    <span>Switch Google Drive (1-Click)</span>
+                  </a>
                   <button
                     onClick={() => {
                       setMenuOpen(false);
@@ -110,8 +127,8 @@ export const Header: React.FC<HeaderProps> = ({
                     }}
                     className="w-full flex items-center space-x-2 px-3 py-2 text-xs font-medium text-slate-300 hover:text-white hover:bg-[#1a2335] rounded-lg transition-colors"
                   >
-                    <HardDrive className="w-4 h-4 text-indigo-400" />
-                    <span>Google Drive Settings</span>
+                    <HardDrive className="w-4 h-4 text-slate-400" />
+                    <span>Drive Configuration Details</span>
                   </button>
                 </div>
 

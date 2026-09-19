@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
-import { getCurrentUser } from "@/lib/auth";
 import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
-  // Only authenticated portal administrators can link or authorize Google OAuth
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.redirect(new URL("/login?error=unauthorized", request.url));
-  }
-
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -34,7 +27,12 @@ export async function GET(request: NextRequest) {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: "offline",
     prompt: "select_account consent",
-    scope: ["https://www.googleapis.com/auth/drive"],
+    scope: [
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/drive",
+    ],
     state,
   });
 

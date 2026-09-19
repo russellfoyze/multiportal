@@ -1,5 +1,7 @@
 import { google, drive_v3 } from "googleapis";
 import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
 import {
   PortalFile,
   PortalStats,
@@ -36,18 +38,96 @@ export function formatPortalDate(dateStr?: string | null): string {
   return `${day} ${month} ${year}`;
 }
 
+export function updateEnvFile(updates: Record<string, string>): void {
+  try {
+    const envPath = path.join(process.cwd(), ".env.local");
+    let content = fs.existsSync(envPath) ? fs.readFileSync(envPath, "utf-8") : "";
+
+    for (const [key, val] of Object.entries(updates)) {
+      process.env[key] = val;
+      const regex = new RegExp(`^${key}=.*$`, "m");
+      if (regex.test(content)) {
+        content = content.replace(regex, `${key}="${val}"`);
+      } else {
+        content += `\n${key}="${val}"`;
+      }
+    }
+
+    fs.writeFileSync(envPath, content.trim() + "\n", "utf-8");
+  } catch (err) {
+    console.error("Failed to update .env.local file:", err);
+  }
+}
+
+export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<string> {
+  const currentFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+  // 1. If we have a folder ID, check if it exists and is accessible by this authenticated drive client
+  if (currentFolderId) {
+    try {
+      const check = await drive.files.get({
+        fileId: currentFolderId,
+        fields: "id, name, trashed",
+        supportsAllDrives: true,
+      });
+      if (check.data.id && !check.data.trashed) {
+        return currentFolderId;
+      }
+    } catch {
+      // The current folder does not exist or belongs to another Google account
+      console.log(`Current folder ${currentFolderId} inaccessible for active account. Resolving account vault...`);
+    }
+  }
+
+  // 2. Search for an existing "MA HOSSAIN Vault" folder in this Google account
+  try {
+    const listRes = await drive.files.list({
+      q: "mimeType = 'application/vnd.google-apps.folder' and name = 'MA HOSSAIN Vault' and trashed = false",
+      fields: "files(id, name)",
+      spaces: "drive",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      pageSize: 5,
+    });
+
+    if (listRes.data.files && listRes.data.files.length > 0) {
+      const foundId = listRes.data.files[0].id!;
+      updateEnvFile({ GOOGLE_DRIVE_FOLDER_ID: foundId });
+      return foundId;
+    }
+
+    // 3. Not found: automatically create "MA HOSSAIN Vault" in this user's Google Drive
+    const createRes = await drive.files.create({
+      requestBody: {
+        name: "MA HOSSAIN Vault",
+        mimeType: "application/vnd.google-apps.folder",
+        description: "MA HOSSAIN Private Document Vault",
+      },
+      fields: "id, name",
+      supportsAllDrives: true,
+    });
+
+    const newFolderId = createRes.data.id!;
+    updateEnvFile({ GOOGLE_DRIVE_FOLDER_ID: newFolderId });
+    return newFolderId;
+  } catch (err) {
+    console.error("Error finding or creating vault folder:", err);
+    return currentFolderId || "root";
+  }
+}
+
 export function isGoogleDriveConfigured(): boolean {
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
   const hasServiceAccount = Boolean(
     (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || process.env.GOOGLE_CLIENT_EMAIL) &&
-    process.env.GOOGLE_PRIVATE_KEY
+    process.env.GOOGLE_PRIVATE_KEY &&
+    process.env.GOOGLE_DRIVE_FOLDER_ID
   );
   const hasOAuth = Boolean(
     process.env.GOOGLE_CLIENT_ID &&
     process.env.GOOGLE_CLIENT_SECRET &&
     process.env.GOOGLE_REFRESH_TOKEN
   );
-  return Boolean(folderId && (hasServiceAccount || hasOAuth));
+  return hasOAuth || hasServiceAccount;
 }
 
 export function getDriveConfigStatus(): DriveConfigStatus {
@@ -60,10 +140,12 @@ export function getDriveConfigStatus(): DriveConfigStatus {
     process.env.GOOGLE_CLIENT_SECRET &&
     process.env.GOOGLE_REFRESH_TOKEN
   );
+  const connectedUserEmail = process.env.GOOGLE_DRIVE_USER_EMAIL || "";
 
-  if (!folderId || (!hasOAuth && (!email || !privateKey))) {
+  if (!hasOAuth && (!folderId || !email || !privateKey)) {
     return {
       isConfigured: false,
+      authMode: "demo_mock",
       error:
         "Google Drive API credentials not fully configured. Running in Local Demo Mode.",
     };
@@ -71,8 +153,12 @@ export function getDriveConfigStatus(): DriveConfigStatus {
 
   return {
     isConfigured: true,
-    serviceAccountEmail: hasOAuth ? "Connected via Personal Google OAuth (15GB Quota)" : email,
+    authMode: hasOAuth ? "oauth2" : "service_account",
+    serviceAccountEmail: hasOAuth
+      ? (connectedUserEmail ? `Connected: ${connectedUserEmail} (15GB Personal Quota)` : "Connected via Personal Google OAuth (15GB Quota)")
+      : email,
     folderId,
+    folderName: "MA HOSSAIN Vault",
   };
 }
 
@@ -205,7 +291,7 @@ export async function listPortalFiles(params: {
   // Real Google Drive API call
   try {
     const drive = getDriveClient();
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID!;
+    const folderId = await getOrCreateVaultFolder(drive);
 
     let q = `'${folderId}' in parents and trashed = false`;
 
@@ -394,7 +480,7 @@ export async function uploadToDrive(params: {
 
   try {
     const drive = getDriveClient();
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID!;
+    const folderId = await getOrCreateVaultFolder(drive);
 
     const readable = new Readable();
     readable.push(params.buffer);
@@ -602,15 +688,20 @@ startxref
   }
 
   const drive = getDriveClient();
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const folderId = await getOrCreateVaultFolder(drive);
 
   // Strict folder boundary containment verification:
-  // Must be directly inside GOOGLE_DRIVE_FOLDER_ID and not trashed
-  const fileMeta = await drive.files.get({
-    fileId,
-    fields: "id, name, originalFilename, mimeType, size, parents, trashed",
-    supportsAllDrives: true,
-  });
+  // Must be directly inside active vault folder and not trashed
+  let fileMeta;
+  try {
+    fileMeta = await drive.files.get({
+      fileId,
+      fields: "id, name, originalFilename, mimeType, size, parents, trashed",
+      supportsAllDrives: true,
+    });
+  } catch {
+    throw new Error("File not found or access denied");
+  }
 
   const isParentValid =
     folderId &&
@@ -665,13 +756,18 @@ export async function updateDriveFileMetadata(
   }
 
   const drive = getDriveClient();
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const folderId = await getOrCreateVaultFolder(drive);
 
-  const current = await drive.files.get({
-    fileId,
-    fields: "id, name, mimeType, size, createdTime, appProperties, description, parents, trashed",
-    supportsAllDrives: true,
-  });
+  let current;
+  try {
+    current = await drive.files.get({
+      fileId,
+      fields: "id, name, mimeType, size, createdTime, appProperties, description, parents, trashed",
+      supportsAllDrives: true,
+    });
+  } catch {
+    return null;
+  }
 
   const isParentValid =
     folderId &&
@@ -746,7 +842,7 @@ export async function deleteDriveFile(fileId: string): Promise<boolean> {
   }
 
   const drive = getDriveClient();
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const folderId = await getOrCreateVaultFolder(drive);
 
   try {
     const current = await drive.files.get({
