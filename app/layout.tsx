@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MA HOSSAIN — Private Document Portal",
-  description: "Secure private document vault powered by Google Drive API for Russell Foyze.",
+  title: "MultiPortal — Private Document Vault",
+  description: "MultiPortal secure private document vault powered by Google Drive API for Russell Foyze.",
   icons: {
     icon: "/favicon.ico",
   },

@@ -46,11 +46,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Left: Brand Logo & Portal Name */}
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <span className="text-white font-bold text-sm tracking-wider">MAH</span>
+            <span className="text-white font-bold text-sm tracking-wider">MP</span>
           </div>
           <div className="flex items-baseline space-x-2">
             <span className="text-white font-bold text-lg tracking-tight">
-              MA HOSSAIN
+              MultiPortal
             </span>
             <span className="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
               Vault

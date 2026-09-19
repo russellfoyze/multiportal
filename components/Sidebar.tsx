@@ -158,7 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="flex items-center justify-between px-2 text-[11px] text-slate-400">
-            <span>MA HOSSAIN Vault v1.0</span>
+            <span>MultiPortal v1.0</span>
             <span className="text-indigo-400">Vercel Ready</span>
           </div>
         </div>

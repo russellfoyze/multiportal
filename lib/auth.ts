@@ -100,5 +100,5 @@ export function verifyTOTP(token: string): boolean {
 
 export function get2FAOtpAuthUrl(): string {
   const user = process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com";
-  return authenticator.keyuri(user, "MA HOSSAIN Vault", ADMIN_2FA_SECRET);
+  return authenticator.keyuri(user, "MultiPortal", ADMIN_2FA_SECRET);
 }

@@ -79,10 +79,10 @@ export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<str
     }
   }
 
-  // 2. Search for an existing "MA HOSSAIN Vault" folder in this Google account
+  // 2. Search for an existing "multiportal" folder in this Google account
   try {
     const listRes = await drive.files.list({
-      q: "mimeType = 'application/vnd.google-apps.folder' and name = 'MA HOSSAIN Vault' and trashed = false",
+      q: "mimeType = 'application/vnd.google-apps.folder' and (name = 'multiportal' or name = 'MultiPortal') and trashed = false",
       fields: "files(id, name)",
       spaces: "drive",
       supportsAllDrives: true,
@@ -96,12 +96,12 @@ export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<str
       return foundId;
     }
 
-    // 3. Not found: automatically create "MA HOSSAIN Vault" in this user's Google Drive
+    // 3. Not found: automatically create "multiportal" in this user's Google Drive
     const createRes = await drive.files.create({
       requestBody: {
-        name: "MA HOSSAIN Vault",
+        name: "multiportal",
         mimeType: "application/vnd.google-apps.folder",
-        description: "MA HOSSAIN Private Document Vault",
+        description: "MultiPortal Private Document Vault",
       },
       fields: "id, name",
       supportsAllDrives: true,
@@ -187,7 +187,7 @@ export function getDriveConfigStatus(): DriveConfigStatus {
       ? (connectedUserEmail ? `Connected: ${connectedUserEmail} (15GB Personal Quota)` : "Connected via Personal Google OAuth (15GB Quota)")
       : email,
     folderId,
-    folderName: "MA HOSSAIN Vault",
+    folderName: "multiportal",
   };
 }
 
@@ -668,7 +668,7 @@ stream
 BT
 /F1 24 Tf
 100 700 Td
-(MA HOSSAIN Private Document Portal) Tj
+(MultiPortal Private Document Vault) Tj
 0 -40 Td
 /F1 14 Tf
 (File: ${name}) Tj
@@ -708,7 +708,7 @@ startxref
   <circle cx="400" cy="240" r="70" fill="#6366f1" fill-opacity="0.2" stroke="#818cf8" stroke-width="3"/>
   <path d="M370 240 L395 265 L445 215" stroke="#a5b4fc" stroke-width="5" fill="none" stroke-linecap="round"/>
   <text x="400" y="360" fill="#f8fafc" font-family="sans-serif" font-size="26" font-weight="bold" text-anchor="middle">${name}</text>
-  <text x="400" y="400" fill="#94a3b8" font-family="sans-serif" font-size="16" text-anchor="middle">MA HOSSAIN Private Document Vault — Verified Secure</text>
+  <text x="400" y="400" fill="#94a3b8" font-family="sans-serif" font-size="16" text-anchor="middle">MultiPortal Private Document Vault — Verified Secure</text>
   <text x="400" y="440" fill="#6366f1" font-family="sans-serif" font-size="14" text-anchor="middle">Demo File Preview</text>
 </svg>`;
       content = Buffer.from(svg);
@@ -719,7 +719,7 @@ startxref
         size: content.length,
       };
     } else {
-      content = Buffer.from(`Document Content for ${name}\nMA HOSSAIN Document Portal`);
+      content = Buffer.from(`Document Content for ${name}\nMultiPortal Document Vault`);
     }
 
     return {

@@ -1,9 +1,9 @@
 @echo off
-title MA HOSSAIN Private Document Vault
+title MultiPortal Private Document Vault
 color 0b
 
 echo ===================================================================
-echo   MA HOSSAIN - Private Document Portal & Vault
+echo   MultiPortal - Private Document Vault
 echo ===================================================================
 echo.
 

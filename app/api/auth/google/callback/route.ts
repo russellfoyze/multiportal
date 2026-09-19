@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
       userName = userEmail.split("@")[0];
     }
 
-    // 3. Automatically locate or create the "MA HOSSAIN Vault" folder in this Google account
+    // 3. Automatically locate or create the "multiportal" folder in this Google account
     let folderId = "";
     try {
       folderId = await getOrCreateVaultFolder(drive);

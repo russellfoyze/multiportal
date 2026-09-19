@@ -52,9 +52,9 @@ $g.DrawPath($borderPen, $path)
 $shadowPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(90, 15, 23, 42), 1.5)
 $g.DrawPath($shadowPen, $path)
 
-# Draw central MAH Monogram
+# Draw central MP Monogram
 $fontFam = New-Object System.Drawing.FontFamily("Segoe UI")
-$fontMAH = New-Object System.Drawing.Font($fontFam, 42, [System.Drawing.FontStyle]::Bold)
+$fontMP = New-Object System.Drawing.Font($fontFam, 42, [System.Drawing.FontStyle]::Bold)
 $formatCenter = New-Object System.Drawing.StringFormat
 $formatCenter.Alignment = [System.Drawing.StringAlignment]::Center
 $formatCenter.LineAlignment = [System.Drawing.StringAlignment]::Center
@@ -62,21 +62,21 @@ $formatCenter.LineAlignment = [System.Drawing.StringAlignment]::Center
 # Text Drop Shadow for 3D depth
 $shadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(120, 15, 23, 42))
 $rectShadow = New-Object System.Drawing.RectangleF(10, 37, 236, 80)
-$g.DrawString("MAH", $fontMAH, $shadowBrush, $rectShadow, $formatCenter)
+$g.DrawString("MP", $fontMP, $shadowBrush, $rectShadow, $formatCenter)
 
 # Main White Typography
 $whiteBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
-$rectMAH = New-Object System.Drawing.RectangleF(10, 35, 236, 80)
-$g.DrawString("MAH", $fontMAH, $whiteBrush, $rectMAH, $formatCenter)
+$rectMP = New-Object System.Drawing.RectangleF(10, 35, 236, 80)
+$g.DrawString("MP", $fontMP, $whiteBrush, $rectMP, $formatCenter)
 
 # Decorative divider line with glow
 $linePen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(140, 199, 210, 254), 2)
 $g.DrawLine($linePen, 50, 124, 206, 124)
 
-# "MA HOSSAIN" Title
+# "MULTIPORTAL" Title
 $fontName = New-Object System.Drawing.Font($fontFam, 14, [System.Drawing.FontStyle]::Bold)
 $rectName = New-Object System.Drawing.RectangleF(10, 134, 236, 30)
-$g.DrawString("MA HOSSAIN", $fontName, $whiteBrush, $rectName, $formatCenter)
+$g.DrawString("MULTIPORTAL", $fontName, $whiteBrush, $rectName, $formatCenter)
 
 # "PRIVATE VAULT" Subtitle Badge
 $fontSub = New-Object System.Drawing.Font($fontFam, 10, [System.Drawing.FontStyle]::Bold)

@@ -1,5 +1,5 @@
 /**
- * MA HOSSAIN Document Portal - File Format & MIME Utilities
+ * MultiPortal - File Format & MIME Utilities
  * Ensures robust file extensions, prevents corruption between PDF/images/docs/videos,
  * and generates standard RFC 6266 Content-Disposition headers for proper downloads.
  */

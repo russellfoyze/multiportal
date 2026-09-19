@@ -87,13 +87,13 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-xl shadow-indigo-600/30 mb-4">
-            <span className="text-white font-black text-xl tracking-wider">MAH</span>
+            <span className="text-white font-black text-xl tracking-wider">MP</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            MA HOSSAIN
+            MultiPortal
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Private Document Portal & Vault
+            Private Document Vault
           </p>
         </div>
 

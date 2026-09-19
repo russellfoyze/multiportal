@@ -1,4 +1,4 @@
-# Create Windows Desktop Shortcut for MA HOSSAIN Vault
+# Create Windows Desktop Shortcut for MultiPortal
 $ws = New-Object -ComObject WScript.Shell
 
 # Priority list of possible app locations
@@ -38,12 +38,12 @@ $createdCount = 0
 
 foreach ($desktopPath in $destinations) {
     if (Test-Path $desktopPath) {
-        $shortcutFile = Join-Path $desktopPath "PORTAL.lnk"
+        $shortcutFile = Join-Path $desktopPath "MultiPortal.lnk"
         $s = $ws.CreateShortcut($shortcutFile)
         $s.TargetPath = $targetBat
         $s.WorkingDirectory = $appDir
         $s.WindowStyle = 1
-        $s.Description = "MA HOSSAIN Private Document Vault"
+        $s.Description = "MultiPortal Private Document Vault"
         if (Test-Path $targetIcon) {
             $s.IconLocation = "$targetIcon,0"
         }

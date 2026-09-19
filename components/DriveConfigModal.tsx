@@ -208,7 +208,7 @@ export const DriveConfigModal: React.FC<DriveConfigModalProps> = ({
             <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px]">
               <li>Create a Google Cloud Project and enable Google Drive API.</li>
               <li>Create a Service Account, create a JSON key, and download it.</li>
-              <li>In your personal Google Drive, create a folder (e.g. &quot;MA HOSSAIN Vault&quot;).</li>
+              <li>In your personal Google Drive, create a folder (e.g. &quot;multiportal&quot;).</li>
               <li>Click Share on the folder and add your Service Account email as Editor.</li>
               <li>Copy the folder ID from the URL (the string after &apos;folders/&apos;).</li>
               <li>Add the credentials to Vercel or `.env.local`!</li>
