@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const formData = await request.formData();
+    const formData: any = await request.formData();
     const file = formData.get("file") as File | null;
     const rawDisplayName = (formData.get("displayName") as string) || "";
     const rawCategory = (formData.get("category") as string) || "Other";

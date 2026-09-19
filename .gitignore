@@ -41,3 +41,7 @@ next-env.d.ts
 Thumbs.db
 *.zip
 *.tmp
+*.apk
+android-app/
+multiportal-mobile/android/
+multiportal-mobile/node_modules/

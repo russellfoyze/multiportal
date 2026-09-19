@@ -21,12 +21,12 @@ const rateLimits = globalThis.__portalRateLimits;
 // Periodic cleanup of stale entries (every 10 minutes)
 setInterval(() => {
   const now = Date.now();
-  for (const [key, record] of rateLimits.entries()) {
+  rateLimits.forEach((record, key) => {
     record.timestamps = record.timestamps.filter((ts) => now - ts < 15 * 60 * 1000);
     if (record.timestamps.length === 0) {
       rateLimits.delete(key);
     }
-  }
+  });
 }, 10 * 60 * 1000);
 
 export interface RateLimitOptions {

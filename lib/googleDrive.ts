@@ -323,7 +323,13 @@ export async function listPortalFiles(params: {
   category?: string;
   typeFilter?: FileTypeFilter;
   tab?: string;
-}): Promise<{ files: PortalFile[]; stats: PortalStats; isMock: boolean }> {
+}): Promise<{
+  files: PortalFile[];
+  stats: PortalStats;
+  isMock: boolean;
+  driveApiDisabled?: boolean;
+  driveErrorMessage?: string;
+}> {
   const { search = "", category = "All", typeFilter = "All file types", tab = "Dashboard" } = params;
 
   if (!isGoogleDriveConfigured()) {
@@ -458,7 +464,7 @@ export async function listPortalFiles(params: {
       );
 
       const fileParents = file.parents || [];
-      let detectedFolderName = appProps.folderName;
+      let detectedFolderName: string | undefined = appProps.folderName;
       if (!detectedFolderName) {
         for (const pId of fileParents) {
           if (subfolderMap.has(pId)) {
