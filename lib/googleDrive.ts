@@ -121,25 +121,21 @@ export function syncEnvFromDisk(): void {
     const envPath = path.join(process.cwd(), ".env.local");
     if (fs.existsSync(envPath)) {
       const content = fs.readFileSync(envPath, "utf-8");
-      const parseVar = (key: string) => {
-        const m = content.match(new RegExp(`^${key}=["']?([^"'\\r\\n]*)["']?`, "m"));
-        return m ? m[1].trim() : undefined;
-      };
-      const keys = [
-        "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET",
-        "GOOGLE_REFRESH_TOKEN",
-        "GOOGLE_DRIVE_FOLDER_ID",
-        "GOOGLE_SERVICE_ACCOUNT_EMAIL",
-        "GOOGLE_PRIVATE_KEY",
-        "PORTAL_ADMIN_EMAIL",
-        "GOOGLE_DRIVE_USER_EMAIL",
-      ];
-      for (const k of keys) {
-        const val = parseVar(k);
-        if (val !== undefined) {
-          process.env[k] = val;
+      const lines = content.split(/\r?\n/);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eqIdx = trimmed.indexOf("=");
+        if (eqIdx === -1) continue;
+        const key = trimmed.slice(0, eqIdx).trim();
+        let val = trimmed.slice(eqIdx + 1).trim();
+        if (
+          (val.startsWith('"') && val.endsWith('"')) ||
+          (val.startsWith("'") && val.endsWith("'"))
+        ) {
+          val = val.slice(1, -1);
         }
+        process.env[key] = val;
       }
     }
   } catch (e) {
