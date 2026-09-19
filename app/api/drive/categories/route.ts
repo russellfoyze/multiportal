@@ -12,6 +12,8 @@ if (!globalThis.__portalCustomCategories) {
   globalThis.__portalCustomCategories = new Set<string>();
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();

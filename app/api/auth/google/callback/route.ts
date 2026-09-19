@@ -10,6 +10,8 @@ import {
 } from "@/lib/googleDrive";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     // 1. Anti-CSRF OAuth state verification
