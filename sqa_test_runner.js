@@ -58,7 +58,7 @@ async function runSQASuite() {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'russellfoyze007@gmail.com', password: 'PortalPass2026!' }),
+      body: JSON.stringify({ email: 'russellfoyze007@gmail.com', password: 'russell@007' }),
     });
     const data = await res.json();
     assert(data.requires2FA === true, '2FA Challenge', 'Password passed, 2FA challenge correctly requested');
@@ -73,8 +73,8 @@ async function runSQASuite() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: 'russellfoyze007@gmail.com',
-        password: 'PortalPass2026!',
-        totpCode: '123456',
+        password: 'russell@007',
+        totpCode: '5683',
       }),
     });
     assert(res.status === 200, '2FA Completion', 'Login with valid 2FA code returned HTTP 200');

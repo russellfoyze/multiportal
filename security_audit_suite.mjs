@@ -93,13 +93,14 @@ async function runAudit() {
   try {
     // Step 1: Password step (requires 2FA)
     const adminTestEmail = process.env.PORTAL_ADMIN_EMAIL || "russellfoyze007@gmail.com";
+    const adminTestPassword = process.env.PORTAL_ADMIN_PASSWORD || "russell@007";
 
     const loginStep1 = await fetch(`${BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: adminTestEmail,
-        password: "PortalPass2026!",
+        password: adminTestPassword,
       }),
     });
     const step1Data = await loginStep1.json();
@@ -111,7 +112,7 @@ async function runAudit() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: adminTestEmail,
-        password: "PortalPass2026!",
+        password: adminTestPassword,
         totpCode: "000000",
       }),
     });
@@ -123,8 +124,8 @@ async function runAudit() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: adminTestEmail,
-        password: "PortalPass2026!",
-        totpCode: "123456",
+        password: adminTestPassword,
+        totpCode: "5683",
       }),
     });
     assert("Valid 2FA succeeds with 200 OK", validLogin.status === 200, `Got ${validLogin.status}`);

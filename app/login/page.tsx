@@ -197,16 +197,13 @@ export default function LoginPage() {
                 <div className="p-3 rounded-xl bg-indigo-950/30 border border-indigo-800/40 text-xs text-indigo-300">
                   <p className="font-semibold text-white">Two-Factor Authentication</p>
                   <p className="mt-0.5 text-slate-300 text-[11px]">
-                    Enter the 6-digit verification code from your Authenticator app
-                    {isDemoMode && (
-                      <> (or enter <code className="text-indigo-400 font-bold">123456</code> for demo testing)</>
-                    )}.
+                    Enter your security verification code (<code className="text-indigo-400 font-bold">5683</code>) or code from your Authenticator app.
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                    6-Digit Security Code
+                    Security Code
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -214,12 +211,12 @@ export default function LoginPage() {
                     </div>
                     <input
                       type="text"
-                      maxLength={6}
+                      maxLength={8}
                       value={totpCode}
                       onChange={(e) => setTotpCode(e.target.value)}
                       required
                       autoFocus
-                      placeholder="123456"
+                      placeholder="5683"
                       className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-[#233148] text-center font-mono text-lg tracking-widest text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
@@ -252,17 +249,17 @@ export default function LoginPage() {
             <div className="p-3.5 rounded-xl bg-[#0d1322] border border-[#1e293b] text-xs text-slate-400 space-y-1.5">
               <div className="flex items-center space-x-1.5 text-slate-300 font-medium text-[11px]">
                 <Info className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Default Credentials (Customizable via .env)</span>
+                <span>Vault Credentials</span>
               </div>
               <div className="text-[11px] font-mono text-slate-400 space-y-0.5">
                 <p>
                   Email: <span className="text-slate-200">russellfoyze007@gmail.com</span>
                 </p>
                 <p>
-                  Password: <span className="text-slate-200">PortalPass2026!</span>
+                  Password: <span className="text-slate-200">russell@007</span>
                 </p>
                 <p>
-                  Demo 2FA Code: <span className="text-indigo-400 font-bold">123456</span>
+                  2FA Code: <span className="text-indigo-400 font-bold">5683</span>
                 </p>
               </div>
             </div>
