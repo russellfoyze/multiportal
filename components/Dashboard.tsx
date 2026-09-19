@@ -10,7 +10,7 @@ import {
   DriveConfigStatus,
   DEFAULT_CATEGORIES,
 } from "@/lib/types";
-import { CheckCircle2, X, HardDrive } from "lucide-react";
+import { CheckCircle2, X, HardDrive, AlertTriangle, ExternalLink } from "lucide-react";
 import { Header } from "./Header";
 import { Sidebar, TabType } from "./Sidebar";
 import { StatCards } from "./StatCards";
@@ -48,6 +48,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDriveConfigOpen, setIsDriveConfigOpen] = useState(false);
   const [driveStatus, setDriveStatus] = useState<DriveConfigStatus | null>(null);
+  const [driveApiError, setDriveApiError] = useState<string | null>(null);
   const [connectedNotification, setConnectedNotification] = useState<{
     connected: boolean;
     email?: string;
@@ -105,6 +106,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
         setFiles(data.files || []);
         if (data.stats) {
           setStats(data.stats);
+        }
+        if (data.driveApiDisabled) {
+          setDriveApiError(
+            data.driveErrorMessage ||
+              "Google Drive API has not been enabled in your Google Cloud Project."
+          );
+        } else {
+          setDriveApiError(null);
         }
       }
     } catch (err) {
@@ -238,7 +247,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialUser }) => {
             </div>
           )}
 
-          {/* Drive Live Status & 1-Click Switch Bar */}
+          {/* Google Drive API Disabled Warning Banner */}
+          {driveApiError && (
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-950/70 to-yellow-950/50 border border-amber-500/60 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-modal">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white flex items-center space-x-2">
+                    <span>Google Drive API Service Disabled</span>
+                    <span className="text-[10px] uppercase font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40">
+                      Action Required
+                    </span>
+                  </p>
+                  <p className="text-xs text-amber-200/90 mt-1 leading-relaxed">
+                    Your Gmail (<strong className="text-white">russellfoyze007@gmail.com</strong>) is authenticated, but the Google Drive API is not yet enabled in your Google Cloud Project (<strong>616654467981</strong>). Click the button below to turn it on, then refresh this page to sync your files.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 flex-shrink-0">
+                <a
+                  href="https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=616654467981"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
+                >
+                  <span>Enable Google Drive API</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          )}
           <div className="mb-6 p-3 rounded-xl bg-[#111726]/80 border border-[#1e293b] flex flex-wrap items-center justify-between gap-2.5">
             <div className="flex items-center space-x-2.5 text-xs">
               <div className={`w-2 h-2 rounded-full ${driveStatus?.isConfigured ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />

@@ -63,7 +63,7 @@ export async function getOrCreateVaultFolder(drive: drive_v3.Drive): Promise<str
   const currentFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
   // 1. If we have a folder ID, check if it exists and is accessible by this authenticated drive client
-  if (currentFolderId) {
+  if (currentFolderId && currentFolderId !== "root") {
     try {
       const check = await drive.files.get({
         fileId: currentFolderId,
@@ -463,6 +463,11 @@ export async function listPortalFiles(params: {
     };
   } catch (error: any) {
     console.error("Error listing files from Google Drive:", error);
+    const isDriveDisabled =
+      error?.message?.includes("Google Drive API has not been used") ||
+      error?.message?.includes("accessNotConfigured") ||
+      error?.status === 403 ||
+      error?.code === 403;
     // Fall back to mock files if Drive error occurs so user can still see interface
     return {
       files: getMockFiles(),
@@ -473,6 +478,8 @@ export async function listPortalFiles(params: {
         favoritesCount: 3,
       },
       isMock: true,
+      driveApiDisabled: isDriveDisabled,
+      driveErrorMessage: error?.message || "Google Drive API error",
     };
   }
 }
