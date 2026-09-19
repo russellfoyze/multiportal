@@ -178,8 +178,14 @@ export function getGoogleOAuthCredentials(): { clientId: string; clientSecret: s
       const content = fs.readFileSync(envPath, "utf-8");
       const idMatch = content.match(/^GOOGLE_CLIENT_ID=["']?([^"'\r\n]+)["']?/m);
       const secretMatch = content.match(/^GOOGLE_CLIENT_SECRET=["']?([^"'\r\n]+)["']?/m);
-      if (idMatch && idMatch[1]) clientId = idMatch[1].trim();
-      if (secretMatch && secretMatch[1]) clientSecret = secretMatch[1].trim();
+      if (idMatch && idMatch[1]) {
+        clientId = idMatch[1].trim();
+        process.env.GOOGLE_CLIENT_ID = clientId;
+      }
+      if (secretMatch && secretMatch[1]) {
+        clientSecret = secretMatch[1].trim();
+        process.env.GOOGLE_CLIENT_SECRET = clientSecret;
+      }
     }
   } catch (e) {
     console.error("Error reading OAuth credentials from .env.local:", e);
