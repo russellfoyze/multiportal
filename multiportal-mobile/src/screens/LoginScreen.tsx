@@ -147,9 +147,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 value={serverUrl}
                 onChangeText={setServerUrl}
                 autoCapitalize="none"
-                placeholder="http://10.0.2.2:3000"
+                placeholder="https://multiportal.vercel.app"
                 placeholderTextColor="#64748B"
               />
+              <View style={styles.presetRow}>
+                <TouchableOpacity
+                  style={[styles.presetBtn, serverUrl.includes("vercel.app") && styles.presetBtnActive]}
+                  onPress={() => setServerUrl("https://multiportal.vercel.app")}
+                >
+                  <Text style={[styles.presetBtnText, serverUrl.includes("vercel.app") && styles.presetBtnTextActive]}>
+                    ☁ Vercel Cloud
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.presetBtn, serverUrl.includes("10.0.2.2") && styles.presetBtnActive]}
+                  onPress={() => setServerUrl("http://10.0.2.2:3000")}
+                >
+                  <Text style={[styles.presetBtnText, serverUrl.includes("10.0.2.2") && styles.presetBtnTextActive]}>
+                    💻 Android Emulator
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
@@ -272,6 +290,34 @@ const styles = StyleSheet.create({
   serverToggleText: {
     fontSize: 11,
     color: "#64748B",
+  },
+  presetRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  presetBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: "#1E293B",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#334155",
+    alignItems: "center",
+  },
+  presetBtnActive: {
+    backgroundColor: "#312E81",
+    borderColor: "#6366F1",
+  },
+  presetBtnText: {
+    color: "#94A3B8",
+    fontSize: 11,
+    fontWeight: "500",
+  },
+  presetBtnTextActive: {
+    color: "#A5B4FC",
+    fontWeight: "bold",
   },
   loginButton: {
     backgroundColor: "#6366F1",
