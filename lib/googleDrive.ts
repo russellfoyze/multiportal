@@ -168,13 +168,32 @@ export function resetCachedDriveClient(): void {
   cachedDriveClient = null;
 }
 
+export function getGoogleOAuthCredentials(): { clientId: string; clientSecret: string } {
+  let clientId = process.env.GOOGLE_CLIENT_ID || "";
+  let clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
+
+  try {
+    const envPath = path.join(process.cwd(), ".env.local");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf-8");
+      const idMatch = content.match(/^GOOGLE_CLIENT_ID=["']?([^"'\r\n]+)["']?/m);
+      const secretMatch = content.match(/^GOOGLE_CLIENT_SECRET=["']?([^"'\r\n]+)["']?/m);
+      if (idMatch && idMatch[1]) clientId = idMatch[1].trim();
+      if (secretMatch && secretMatch[1]) clientSecret = secretMatch[1].trim();
+    }
+  } catch (e) {
+    console.error("Error reading OAuth credentials from .env.local:", e);
+  }
+
+  return { clientId, clientSecret };
+}
+
 export function getDriveClient(): drive_v3.Drive {
   if (cachedDriveClient) {
     return cachedDriveClient;
   }
 
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const { clientId, clientSecret } = getGoogleOAuthCredentials();
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
   // 1. If personal OAuth2 credentials are present, use user's personal Google account (15GB+ storage quota)

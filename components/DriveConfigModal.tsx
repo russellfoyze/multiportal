@@ -160,8 +160,8 @@ export const DriveConfigModal: React.FC<DriveConfigModalProps> = ({
                 },
                 {
                   key: "PORTAL_ADMIN_EMAIL",
-                  sample: "akter@mahossain.com",
-                  desc: "Authorized Admin Email",
+                  sample: "russellfoyze007@gmail.com",
+                  desc: "Authorized Developer / Admin Email",
                 },
                 {
                   key: "PORTAL_ADMIN_PASSWORD",

@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { createSessionCookie } from "@/lib/auth";
 import { AuthUser } from "@/lib/types";
-import { resetCachedDriveClient, updateEnvFile, getOrCreateVaultFolder } from "@/lib/googleDrive";
+import {
+  resetCachedDriveClient,
+  updateEnvFile,
+  getOrCreateVaultFolder,
+  getGoogleOAuthCredentials,
+} from "@/lib/googleDrive";
 import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
@@ -35,8 +40,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
     }
 
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const { clientId, clientSecret } = getGoogleOAuthCredentials();
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(new URL("/login?error=missing_oauth_keys", request.url));

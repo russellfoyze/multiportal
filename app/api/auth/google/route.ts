@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { getGoogleOAuthCredentials } from "@/lib/googleDrive";
 import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const { clientId, clientSecret } = getGoogleOAuthCredentials();
 
   if (!clientId || !clientSecret) {
     return NextResponse.json(
